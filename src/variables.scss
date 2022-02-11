@@ -1,0 +1,36 @@
+/* Variables and mixins declared here will be available in all other SCSS files */ /* https://github.com/jgthms/bulma/issues/1293 */
+$body-overflow-y: auto;
+// Set your brand colors
+$bright-green: #22be14;
+$cyan: #32c1b5;
+$brown: #757763;
+$beige-light: #D0D1CD;
+$beige-lighter: #EFF0EB;
+$tan: #a98f71;
+$vcs-background: #73757a;
+$primary-text: #111111;
+
+// Update Bulma's global variables
+$family-sans-serif: "IBM Plex Sans", sans-serif;
+$primary: $cyan;
+$warning: $bright-green;
+$success: #338079; //http://colorcode.is/from/code/5cbeb5
+$link: #1e509c;
+$widescreen-enabled: true;
+$fullhd-enabled: false;
+$pre-background: antiquewhite;
+$code-background: transparent;
+$warning-light: antiquewhite;
+$box-background-color: #f2f3f4; //antiflashwhite http://anti-flash-white.colorcode.is/
+$table-head-background-color: transparent;
+
+// Update some of Bulma's component variables
+$body-background-color: $vcs-background;
+$control-border-width: 2px;
+$input-border-color: transparent;
+$input-shadow: none;
+$content-blockquote-background-color: antiquewhite;
+
+// Navbar
+$navbar-breakpoint: 500px;
+$navbar-background-color: hsla(0,0%,90%, 90%);
