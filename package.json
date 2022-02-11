@@ -1,0 +1,43 @@
+{
+	"name": "two-tone-v2",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "svelte-kit dev",
+		"build": "svelte-kit build",
+		"package": "svelte-kit package",
+		"preview": "svelte-kit preview",
+		"lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
+		"svelteiconifysvg": "svelte-iconify-svg -i 'input/directory1' 'input/directory2' -o 'output/filePath.js'"
+	},
+	"devDependencies": {
+		"@iconify/svelte": "^2.1.2",
+		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/adapter-netlify": "^1.0.0-next.44",
+		"@sveltejs/kit": "next",
+		"bulma": "^0.9.3",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-svelte3": "^3.2.1",
+		"prettier": "^2.4.1",
+		"prettier-plugin-svelte": "^2.4.0",
+		"sass": "^1.46.0",
+		"svelte": "^3.44.0",
+		"svelte-iconify-svg": "^2.3.4",
+		"svelte-preprocess": "^4.10.1"
+	},
+	"type": "module",
+	"dependencies": {
+		"@iconify/json": "^2.0.33",
+		"@observablehq/plot": "^0.4.0",
+		"apache-arrow": "^7.0.0",
+		"bulma": "^0.9.3",
+		"d3": "^7.3.0",
+		"d3-dsv": "^3.0.1",
+		"d3-scale-chromatic": "^3.0.0",
+		"d3-time-format": "^4.1.0",
+		"filesaver.js-npm": "^1.0.1",
+		"marked": "^4.0.12",
+		"svelte-hint": "^1.0.0-rc.2"
+	}
+}
