@@ -2,8 +2,6 @@
 // not working yet
 
     import * as Plot from "@observablehq/plot";
-    import * as arquero from '../js/modules/arquero-master/src'
-
 
     export let data = {}, col = 0
 

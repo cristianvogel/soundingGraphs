@@ -98,7 +98,7 @@
         </div>
         <div class="navbar-end p-2">
             <Hint>
-            <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4">Sonify</button>
+            <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover ">Sonify</button>
                 <i slot="hint" class={globStyle.toolTip}>Sonify data set</i>
             </Hint>
         </div>
@@ -108,5 +108,7 @@
 
 
 <style>
-
+    #import:hover {
+        background-color: #32c1b5;
+    }
 </style>

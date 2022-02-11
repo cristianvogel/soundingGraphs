@@ -1,7 +1,6 @@
 <script>
     import { dataSets } from "../stores/dataSetsStore.js";
     import TableHTML from "./TableHTML.svelte";
-    import BarChart from "./BarChart.svelte";
 
 </script>
 
