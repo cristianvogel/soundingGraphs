@@ -1,3 +1,5 @@
+// custom dataSetsStore by miu
+
 import { arrayStore } from "./arrayStore.js";
 import dataSetsIndex from "../dataSets/dataSetsIndex.js";
 import { headedColumnsFrom, transposeRowsToColumns} from "../js/dataProcessingUtils.js";
@@ -57,11 +59,3 @@ dataSets.loadMany(dataSetsIndex.map( ( dataset, index  ) =>
     }
 }));
 
-/*
-let destructedDataSets = () => {
-
-    const dataSets =
-    dataSetsStore.set(dataSets);
-};
-destructedDataSets();
-*/

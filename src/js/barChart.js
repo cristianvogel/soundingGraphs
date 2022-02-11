@@ -1,11 +1,8 @@
-<script>
-// not working yet
+import * as Plot from "@observablehq/plot";
 
-    import * as Plot from "@observablehq/plot";
-
-    export let data = {}, col = 0
-
+export function plotBarChart ( data = {} ) {
     // const dataTable = arquero.table(data).objects( {columns: [0,1]} );
+
     const sales = [
         {units: 10, fruit: "fig"},
         {units: 20, fruit: "date"},
@@ -14,9 +11,13 @@
     ]
 
     // console.log( dataTable )
-    const graphPlot = Plot.dot(sales, {x: 'fruit', fill: 'units', fillOpacity: 0.2}).plot()
+    const graphPlot = Plot.dot(sales, {x: 'fruit', fill: 'units', fillOpacity: 0.2}).plot();
 
-</script>
+    return graphPlot
+    }
 
-<svg>{ graphPlot }</svg>
+
+
+
+
 

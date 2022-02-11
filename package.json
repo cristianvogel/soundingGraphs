@@ -14,7 +14,7 @@
 		"@iconify/svelte": "^2.1.2",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/adapter-netlify": "^1.0.0-next.44",
-		"@sveltejs/kit": "next",
+		"@sveltejs/kit": "^1.0.0-next.265",
 		"bulma": "^0.9.3",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
@@ -30,7 +30,7 @@
 	"dependencies": {
 		"@iconify/json": "^2.0.33",
 		"@observablehq/plot": "^0.4.0",
-		"apache-arrow": "^7.0.0",
+		"arquero": "^4.8.8",
 		"bulma": "^0.9.3",
 		"d3": "^7.3.0",
 		"d3-dsv": "^3.0.1",

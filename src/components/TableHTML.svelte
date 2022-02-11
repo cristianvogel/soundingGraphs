@@ -1,10 +1,9 @@
 <script>
-
-    import { table } from "../js/modules/arquero-master/src" ;
     import { formatDate, formatTime } from "../js/dateUtils.js";
     import Hint from "svelte-hint";
     import { globStyle } from '../assets/styleDefs.js'
     import { slide, fade , fly } from 'svelte/transition';
+    import { table } from 'arquero'
 
     export let data, index;
     const pageStep = 10;
