@@ -1,6 +1,6 @@
 <script>
 
-    import { table } from "../js/modules/arquero-master/src";
+    import { table } from "../js/modules/arquero-master/src" ;
     import { formatDate, formatTime } from "../js/dateUtils.js";
     import Hint from "svelte-hint";
     import { globStyle } from '../assets/styleDefs.js'
@@ -8,7 +8,7 @@
 
     export let data, index;
     const pageStep = 10;
-    $:tableOffset = 0;
+    let tableOffset = 0;
     const rowCount = table( data ).numRows();
     let hide = true;
     let incr = true;
