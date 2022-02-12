@@ -1,3 +1,15 @@
+import  * as aq from 'arquero'
+
+export function columnCount( dataColumns ) {
+    const arqueroTable = aq.table(dataColumns)
+    return  arqueroTable.numCols()
+}
+
+export function rowCount( dataColumns  ){
+    const arqueroTable = aq.table(dataColumns)
+    return  arqueroTable.numRows()
+}
+
 /**
  *
  * @param m Array containing array of data interpreted as being elements in a row
@@ -19,3 +31,31 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
     propNames.map( (l, i) => { Object.assign( result, { [l]: columnData[i] } ) })
     return result;
 }
+
+/**
+ *
+ * @param dataColumns data, will be converted to Arquero table inside this function
+ *          adds a column tracking the rowNumber and uses that as a generic X-axis for plots
+ *          todo: actually parse dates, times and hours and use those instead
+ * @returns {*[]}  Array of data objects, no longer in Arquero table format
+ */
+
+export function mapDataToXYPoints( dataColumns = aq.table( { "Year" : [], "value" : [] })) {
+    const arqueroTable =  aq.table(dataColumns)
+    const tableWithIndex = arqueroTable.assign({ rowNumber: arqueroTable.indices() })
+    let options = {}
+    let xy = []
+
+    const justNames = tableWithIndex.columnNames()
+
+        justNames.forEach( (e, i) => {
+            options = {}
+            options = {rowNumber: 'x', [e]: 'y'}
+            xy.push(tableWithIndex.select(options))
+        })
+    let result = []
+    xy.forEach(t => result.push(t.objects()))
+    return result
+}
+
+

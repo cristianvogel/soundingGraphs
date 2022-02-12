@@ -1,14 +1,14 @@
 <script>
     import { dataSets } from "../stores/dataSetsStore.js";
     import TableHTML from "./TableHTML.svelte";
-    import BarChart from "./BarChart.svelte";
+    import SmallMultiples from "./SmallMultiples.svelte";
 
 </script>
 
 {#if $dataSets.length}
     {#each $dataSets as metadata, index }
         <thead class="tableTitle">{metadata.title.toUpperCase()}</thead>
-        <BarChart data={metadata.columnsWithHeaders} />
+        <SmallMultiples data={metadata.columnsWithHeaders} {index} />
         <TableHTML data={metadata.columnsWithHeaders} {index} />
     {/each}
 {/if}
