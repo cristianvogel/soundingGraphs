@@ -967,10 +967,10 @@
   dependencies:
     "flat-cache" "^3.0.4"
 
-"filesaver.js-npm@^1.0.1":
-  "integrity" "sha1-rm0dETGU3OT7UKwNkEpA60UVl8c="
-  "resolved" "https://registry.npmjs.org/filesaver.js-npm/-/filesaver.js-npm-1.0.1.tgz"
-  "version" "1.0.1"
+"file-saver@^2.0.5":
+  "integrity" "sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA=="
+  "resolved" "https://registry.npmjs.org/file-saver/-/file-saver-2.0.5.tgz"
+  "version" "2.0.5"
 
 "fill-range@^7.0.1":
   "integrity" "sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ=="
