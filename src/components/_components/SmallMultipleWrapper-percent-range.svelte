@@ -1,20 +1,16 @@
 <script>
-    import { LayerCake, ScaledSvg, calcExtents, Html } from 'layercake';
+    import {LayerCake, ScaledSvg, Html, flatten} from 'layercake';
     import SharedTooltip from './SharedTooltip.html.svelte';
     import Labels from './GroupLabels.html.svelte';
-    import {interpolateRainbow, interpolateGreys } from "d3-scale-chromatic";
+    import {interpolateRainbow} from "d3-scale-chromatic";
     import Line from './Line.svelte';
 
     export let data;
     export let fullExtents;
-    export let scale;
     export let extentGetters;
     export let normStep = 0;
     export let header;
-
-
-    const extents = calcExtents(data, extentGetters);
-
+    export let step;
     const colours = {bg: interpolateRainbow(normStep ** 2), fg: '#111' };
 
 
@@ -27,8 +23,9 @@
         x={extentGetters.x}
         y={extentGetters.y}
         {data}
-        xDomain={extents.x}
-        yDomain={extents.y}
+        flatData = {flatten(data)}
+        xDomain = {fullExtents}
+        yDomain ={fullExtents}
 >
     <ScaledSvg>
         <Line

@@ -3,7 +3,7 @@
     import {mapDataToXYPoints, columnCount} from "../../js/dataProcessingUtils.js";
     import {onMount} from "svelte";
     import {op} from 'arquero'
-    import {calcExtents} from "layercake";
+    import {calcExtents, flatten} from "layercake";
 
     export let data = {};  // dataset shaped as columns with keys: headers values: column-data
     export let index;
@@ -21,27 +21,21 @@
               * // { x: [ min, max ] y: [ min, max ] ... }
              */
             // Array needs to be FLAT() for this to work
-            fullExtents = calcExtents( pointSeries.flat(), extentGetters)
+            fullExtents = calcExtents( flatten(pointSeries), extentGetters)
 
             /* -----LayerCake example code---------------------------------------
             * Sort by the last value
             */
-            pointSeries.sort((a, b) => {
-                return b[b.length - 1].y - a[a.length - 1].y;
-            });
+            // pointSeries.sort((a, b) => {
+            //     return b[b.length - 1].y - a[a.length - 1].y;
+            // });
         }
     )
     const extentGetters = {'x': d => d.x , 'y': d => d.y }
 
     const headers = op.keys(data)
-    let scale = 'individual';
 
 </script>
-
-<div class="input-container" id="table_{index}">
-    <label><input class="radio" type="radio" bind:group={scale} value="individual"/>Individual scale</label>
-    <label><input class="radio" type="radio" bind:group={scale} value="shared"/>Shared scale</label>
-</div>
 
 <div  class="group-container" style="height: {containerHeight}px">
     {#if pointSeries}
@@ -50,12 +44,12 @@
         {@const header = headers[step]}
         <div class="chart-container" style="height: {Math.max( 50, containerHeight/20)}px">
             <SmallMultipleWrapper
+                    {extentGetters}
                     {data}
                     {fullExtents}
-                    {scale}
-                    {extentGetters}
                     {normStep}
                     {header}
+                    {step}
             />
         </div>
     {/each}
