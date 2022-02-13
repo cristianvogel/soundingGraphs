@@ -1,7 +1,7 @@
 <script>
     import { dataSets } from "../stores/dataSetsStore.js";
     import TableHTML from "./TableHTML.svelte";
-    import SmallMultiples from "./SmallMultiples.svelte";
+    import SmallMultiples from "./_components/SmallMultiples.svelte";
 
 </script>
 

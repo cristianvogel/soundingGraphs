@@ -1,15 +1,18 @@
-import  * as aq from 'arquero'
+import  { table, op } from 'arquero'
 
 export function columnCount( dataColumns ) {
-    const arqueroTable = aq.table(dataColumns)
+    const arqueroTable = table(dataColumns)
     return  arqueroTable.numCols()
 }
 
 export function rowCount( dataColumns  ){
-    const arqueroTable = aq.table(dataColumns)
+    const arqueroTable = table(dataColumns)
     return  arqueroTable.numRows()
 }
 
+export function toFloat( v ) {
+    return op.parse_float(v)
+}
 /**
  *
  * @param m Array containing array of data interpreted as being elements in a row
@@ -37,11 +40,11 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
  * @param dataColumns data, will be converted to Arquero table inside this function
  *          adds a column tracking the rowNumber and uses that as a generic X-axis for plots
  *          todo: actually parse dates, times and hours and use those instead
- * @returns {*[]}  Array of data objects, no longer in Arquero table format
+ * @returns {*[]}  Array of data objects keyed by x: and y: no longer in Arquero table format
  */
 
-export function mapDataToXYPoints( dataColumns = aq.table( { "Year" : [], "value" : [] })) {
-    const arqueroTable =  aq.table(dataColumns)
+export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" : [] })) {
+    const arqueroTable =  table(dataColumns)
     const tableWithIndex = arqueroTable.assign({ rowNumber: arqueroTable.indices() })
     let options = {}
     let xy = []
@@ -57,5 +60,7 @@ export function mapDataToXYPoints( dataColumns = aq.table( { "Year" : [], "value
     xy.forEach(t => result.push(t.objects()))
     return result
 }
+
+
 
 
