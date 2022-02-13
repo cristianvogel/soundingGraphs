@@ -1,6 +1,6 @@
 //todo: more file handling stuff here for browser based loading and server side remote loading
 
-import FileSaver from 'filesaver.js-npm';
+import FileSaver from 'file-saver';
 
 const fileIO = {
     saveBlob: function (data = 'empty', format = 'json') {
