@@ -5,9 +5,7 @@
 <script>
     import { getContext } from 'svelte';
     import { format } from 'd3-format';
-
     import QuadTree from './QuadTree.html.svelte';
-
     const { data, width, yScale, config } = getContext('LayerCake');
     /** @type {String} header label text
      *
@@ -38,7 +36,7 @@
     export let dataset = undefined;
     export let colours = { bg: 'black' , fg: 'white' };
 
-    const w = 180;
+    const w = 240;
     const w2 = w / 2;
 
     /* --------------------------------------------
@@ -103,20 +101,18 @@
         let:e
 >
     {@const foundSorted = sortResult(found)}
-    {#if visible === true}
-        <div
-                style="left:{x}px;"
-                class="line"></div>
+    {#if visible === true }
         <div
                 class="tooltip"
                 style="
                         width:{w}px;
                         display: { visible ? 'block' : 'none' };
-                        top:{$yScale(foundSorted[0].value) + offset}px;
+                        top:{offset}px;
                         left:{Math.min(Math.max(w2, x), $width - w2)}px;
                     "
         >
-            <span class="is-size-3" style="color: {colours.bg}">◉️</span><abbr class="has-text-weight-semibold is-size-7" style="color: {colours.fg}" >{formatTitle(header)}</abbr>
+            <span class="is-size-3" style="color: {colours.bg}">◉️</span>
+            <span class="has-text-left has-text-weight-semibold is-size-6" style="color: {colours.fg}" >{formatTitle(header)}</span>
             {#each foundSorted as row}
                 <div class="row"><span class="key">{formatKey(row.key)}∙</span> {formatValue(row.value)}</div>
             {/each}

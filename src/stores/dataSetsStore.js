@@ -8,7 +8,7 @@ const dataSetsStore = (initial) => {
     const store = arrayStore(initial);
     const load = async ({ position, data_id, title, source, importDataFrom, dataType = 'json' }) => {
         let structuredData;
-        console.log('adding', position, data_id, title, source, importDataFrom, dataType);
+       // console.log('adding', position, data_id, title, source, importDataFrom, dataType);
         if(typeof importDataFrom === 'function') {
             // Handle async loading..
             const _data = await Promise.resolve(importDataFrom());

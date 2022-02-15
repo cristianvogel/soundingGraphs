@@ -4,7 +4,7 @@
  -->
 <script>
     import { getContext } from 'svelte';
-    import { op } from 'arquero';  //replace with Arquero op
+    import { op } from 'arquero';
 
     const { data, x, y, xScale, yScale, xRange, yRange, z } = getContext('LayerCake');
 

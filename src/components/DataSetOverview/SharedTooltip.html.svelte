@@ -28,7 +28,7 @@
   /** @type {Array} [dataset] - The dataset to work off of—defaults to $data if left unset. You can pass something custom in here in case you don't want to use the main data or it's in a strange format. */
   export let dataset = undefined;
 
-  const w = 150;
+  const w = 200;
   const w2 = w / 2;
 
   /* --------------------------------------------

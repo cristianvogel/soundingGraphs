@@ -1,4 +1,24 @@
-import  { table, op } from 'arquero'
+import { op, table} from 'arquero';
+
+
+/**
+ * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
+ */
+
+export function normalizeText( text ) {
+    return normalize_column( text )
+}
+
+function normalize_column(name) {
+    if (!(name)) return
+    return name.toUpperCase()            // map to lower case
+        .replace(/[%#$£()\'\"]/g, '')      // remove unwanted characters
+        .replace(/_+/g, '_')               // collapse repeated underscores
+        .normalize('NFD')                  // perform unicode normalization
+        .replace(/[\u0300-\u036f]/g, '');  // strip accents from characters
+}
+
+//////////////////
 
 export function columnCount( dataColumns ) {
     const arqueroTable = table(dataColumns)
@@ -22,7 +42,6 @@ export function transposeRowsToColumns( m = [] ) { return m[0].map((x,i) => m.ma
 
 /**
  * Wrapper to conform the old TT data types into something more JSON and graph friendly
- *
  * @param metaKey a Key to use as header , read from
  * @param metaData an object which should contain some data for prop defined as metaKey
  * @param columnData this data array will be the value of the metaKey prop
@@ -60,6 +79,7 @@ export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" :
     xy.forEach(t => result.push(t.objects()))
     return result
 }
+
 
 
 

@@ -1,9 +1,11 @@
+<!--suppress ALL -->
 <script>
-    import SmallMultipleWrapper from './SmallMultipleWrapper-percent-range.svelte';
-    import {mapDataToXYPoints, columnCount} from "../../js/dataProcessingUtils.js";
+    import SmallMultipleWrapper from './SmallMultipleWrapper.svelte';
+    import {mapDataToXYPoints, columnCount, normalizeText} from "../../js/dataProcessingUtils.js";
     import {onMount} from "svelte";
-    import {op} from 'arquero'
+    import { op } from 'arquero';
     import {calcExtents, flatten} from "layercake";
+
 
     export let data = {};  // dataset shaped as columns with keys: headers values: column-data
     export let index;
@@ -22,17 +24,9 @@
              */
             // Array needs to be FLAT() for this to work
             fullExtents = calcExtents( flatten(pointSeries), extentGetters)
-
-            /* -----LayerCake example code---------------------------------------
-            * Sort by the last value
-            */
-            // pointSeries.sort((a, b) => {
-            //     return b[b.length - 1].y - a[a.length - 1].y;
-            // });
         }
     )
     const extentGetters = {'x': d => d.x , 'y': d => d.y }
-
     const headers = op.keys(data)
 
 </script>
@@ -41,7 +35,7 @@
     {#if pointSeries}
     {#each pointSeries as data, step}
         {@const normStep = (step - 1) / (pointSeries.length - 1)}
-        {@const header = headers[step]}
+        {@const header = normalizeText(headers[step])}
         <div class="chart-container" style="height: {Math.max( 50, containerHeight/20)}px">
             <SmallMultipleWrapper
                     {extentGetters}
@@ -60,6 +54,7 @@
     .group-container {
         width: 100%;
         height: 300px;
+        padding-bottom: 12px;
     }
     .input-container {
         margin-bottom: 7px;

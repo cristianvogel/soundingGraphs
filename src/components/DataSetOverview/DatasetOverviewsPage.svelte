@@ -1,0 +1,22 @@
+<script>
+    import { dataSets } from "../../stores/dataSetsStore.js";
+    import ViewAsTable from "./ViewAsTable.svelte";
+    import SmallMultiples from "../SmallGraphView/SmallMultiples.svelte";
+    import {normalizeText} from "../../js/dataProcessingUtils.js";
+
+</script>
+
+{#if $dataSets.length}
+    {#each $dataSets as metadata, index }
+        <thead class="tableTitle">{normalizeText(metadata.title)}</thead>
+        <SmallMultiples data={metadata.columnsWithHeaders} {index} />
+        <ViewAsTable data={metadata.columnsWithHeaders} {index} />
+    {/each}
+{/if}
+
+<style>
+    .tableTitle {
+        overflow-x: visible;
+        font-size: x-large;
+    }
+</style>
