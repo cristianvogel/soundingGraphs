@@ -2,16 +2,16 @@
     import Hint from "svelte-hint";
     import { globStyle } from '../../assets/styleDefs.js'
     import {  fade  } from 'svelte/transition';
-    import { rowCount } from "../../js/dataProcessingUtils.js";
+    import { rowCount } from "$lib/DataUtils.js";
     import {getContext} from "svelte";
 
     export let data = {}
-    export let hidden = true;
+    export let page = {};
 
-    const toggleView = getContext('tableState').toggleView
-    const inc = getContext('jump').inc
-    const dec = getContext('jump').dec
+    const { toggleView, visible } = getContext('table.status')
+    const { inc, dec } = getContext('table.jump')
     const numberRows = rowCount(data);
+    import Icon from '@iconify/svelte';
 
 </script>
 
@@ -19,31 +19,40 @@
     <div class="navbar" >
         <div class="navbar-start p-2">
             <Hint>
-                <button class="button has-background-success has-text-white-ter has-text-weight-bold pl-4 pr-4"
+                <button class="button has-text-dark has-text-weight-bold pl-4 pr-4"
                         aria-label="show table"
                         on:click={toggleView}>
-                    <span >{hidden ? "Show " : "Hide "} {numberRows} rows {Object.keys(data).length} columns</span>
+                    <span>
+                        {#if $visible}
+                            { numberRows + ' rows ' + Object.keys(data).length +' columns'}
+                        {:else }
+                            <Icon icon="mdi-checkbox-marked-circle-outline" class="m-2 is-size-4 mt-4" />
+                        {/if}
+                    </span>
                 </button>
-                <i slot="hint" class={globStyle.toolTip}>{hidden ? "Open" : "Close"} table view</i>
+                <i slot="hint" class={globStyle.toolTip}>{$visible  ? "Open" : "Close"} table view</i>
             </Hint>
-            {#if !hidden}
+            {#if !$visible }
                 <Hint>
                     <button id="dec" class="button is-rounded ml-2 mr-2" on:click={dec}
                             transition:fade>
                         <span>▲</span>
                     </button>
-                    <i slot="hint" class={globStyle.toolTip}>Page up 10 entries</i>
+                    <i slot="hint" class={globStyle.toolTip}>Page up</i>
                 </Hint>
                 <Hint>
                     <button id="inc" class="button is-rounded" on:click={inc} transition:fade>
                         <span>▼</span>
                     </button>
-                    <i slot="hint" class={globStyle.toolTip}>Page down 10 entries</i>
+                    <i slot="hint" class={globStyle.toolTip}>Page down</i>
                 </Hint>
+
             {/if}
         </div>
         <div class="navbar-item">
-            <!-- todo: display table metadata, source etc -->
+            {#if !$visible }
+                <span class="has-text-grey-dark">Page {Math.ceil((page.offset + page.step) / page.step)}</span>
+            {/if}
         </div>
         <div class="navbar-end p-2">
             <Hint>

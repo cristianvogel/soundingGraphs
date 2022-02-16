@@ -1,7 +1,6 @@
 <script>
     import Icon from '@iconify/svelte';
     import Hint from "svelte-hint";
-    import {globStyle} from "../assets/styleDefs.js";
 </script>
 
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">

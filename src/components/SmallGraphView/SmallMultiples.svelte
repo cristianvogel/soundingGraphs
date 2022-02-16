@@ -1,7 +1,7 @@
 <!--suppress ALL -->
 <script>
     import SmallMultipleWrapper from './SmallMultipleWrapper.svelte';
-    import {mapDataToXYPoints, columnCount, normalizeText} from "../../js/dataProcessingUtils.js";
+    import {mapDataToXYPoints, columnCount, normalizeText} from "$lib/DataUtils.js";
     import {onMount} from "svelte";
     import { op } from 'arquero';
     import {calcExtents, flatten} from "layercake";
@@ -36,7 +36,7 @@
     {#each pointSeries as data, step}
         {@const normStep = (step - 1) / (pointSeries.length - 1)}
         {@const header = normalizeText(headers[step])}
-        <div class="chart-container" style="height: {Math.max( 50, containerHeight/20)}px">
+        <div class="chart-container mt-1" style="height: {Math.max( 50, containerHeight/20)}px">
             <SmallMultipleWrapper
                     {extentGetters}
                     {data}
@@ -51,20 +51,6 @@
 </div>
 
 <style>
-    .group-container {
-        width: 100%;
-        height: 300px;
-        padding-bottom: 12px;
-    }
-    .input-container {
-        margin-bottom: 7px;
-    }
-    label {
-        cursor: pointer;
-    }
-    input {
-        margin-right: 7px;
-    }
     /*
         The wrapper div needs to have an explicit width and height in CSS.
         It can also be a flexbox child or CSS grid element.

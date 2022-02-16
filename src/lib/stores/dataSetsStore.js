@@ -1,8 +1,8 @@
 // custom dataSetsStore by miu
 
 import { arrayStore } from "./arrayStore.js";
-import dataSetsIndex from "../dataSets/dataSetsIndex.js";
-import { headedColumnsFrom, transposeRowsToColumns} from "../js/dataProcessingUtils.js";
+import dataSetsIndex from "../../assets/dataSets/dataSetsIndex.js";
+import { headedColumnsFrom, transposeRowsToColumns} from "$lib/DataUtils";
 
 const dataSetsStore = (initial) => {
     const store = arrayStore(initial);

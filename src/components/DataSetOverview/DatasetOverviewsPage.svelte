@@ -1,8 +1,8 @@
 <script>
-    import { dataSets } from "../../stores/dataSetsStore.js";
+    import { dataSets } from "$lib/stores/dataSetsStore.js";
     import ViewAsTable from "./ViewAsTable.svelte";
     import SmallMultiples from "../SmallGraphView/SmallMultiples.svelte";
-    import {normalizeText} from "../../js/dataProcessingUtils.js";
+    import {normalizeText} from "$lib/DataUtils.js";
 
 </script>
 

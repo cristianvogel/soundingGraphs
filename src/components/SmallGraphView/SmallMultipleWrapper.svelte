@@ -11,7 +11,7 @@
     export let normStep = 0;
     export let header;
     export let step;
-    const colours = {bg: interpolateRainbow(normStep ** 2), fg: '#111' };
+    const colours = {bg: interpolateRainbow(normStep ** 2), fg: '#111'}
 </script>
 
 <LayerCake

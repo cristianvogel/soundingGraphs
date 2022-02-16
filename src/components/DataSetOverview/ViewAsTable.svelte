@@ -1,17 +1,23 @@
 <script>
     import { slide , fly } from 'svelte/transition';
-    import {normalizeText, rowCount} from "../../js/dataProcessingUtils.js";
+    import { rowCount, toCamelCase, normalizeText} from "$lib/DataUtils.js";
     import TableBody from "./TableBody.svelte";
     import DataSetFooter from "./DataSetFooter.svelte";
-    import {setContext} from 'svelte';
+    import { __tableViewState } from '$lib/stores/generalStores.js'
+    import { get } from 'svelte/store'
+    import {interpolateRainbow} from "d3-scale-chromatic";
+    import { color } from 'd3-color'
+    import {setContext} from "svelte";
 
     export let data = {}
     export let index = 0;
+    const size = Object.keys(data).length || 1;
+
     const numberRows = rowCount(data);
+    const visible = __tableViewState();
+    const tint = ( i ) =>  color( interpolateRainbow(i ** 2)).darker(0.5)
 
-    $: hidden = true;
     let offset = 0, step = 10, direction = 1
-
 
     const inc = () => {
         if ((offset + step) >= (numberRows - step)) {
@@ -31,34 +37,37 @@
         direction = 0;
     }
 
-    setContext( 'jump', {inc, dec} )
-    setContext('tableState', {
-        toggleView: () => hidden = !hidden
-    } );
+    setContext( 'table.jump', { inc, dec } )
+    setContext('table.status', {
+        toggleView: () => visible.set(!get(visible)),
+        visible: visible
+    });
+
 
 
 </script>
-{#if !hidden}
+
+{#if !$visible}
     <div class="table-container is-centered">
     <table class="table is-striped is-narrow" out:slide style="background-color: transparent">
         {#each (Object.keys(data)) as title, i}
+            {@const normSpread = (i-1) / ( size - 1) }
             <th>
-                <abbr class="has-background-success has-text-white-ter is-size-6 p-1" {title} >
-                    {normalizeText(title)}
+                <abbr class="has-text-white-ter is-size-6 p-1" {title} >
+                  <span style="background-color: { tint(normSpread) }">{normalizeText(title)}</span>
                 </abbr>
             </th>
         {/each}
         {#key offset}
-        <tbody id={'table'+index} in:fly={{ y: ( direction ? 50 : -50)  }}>
-                 <TableBody {data} page="{{step, offset}}" />
-        </tbody>
+            <tbody id={'table'+index} in:fly={{ y: ( direction ? 50 : -50)  }}>
+                     <TableBody {data} page="{{step, offset}}" />
+            </tbody>
         {/key}
-
     </table>
     </div>
 {/if}
 <div class="mt-4">
-    <DataSetFooter {data} {hidden}/>
+    <DataSetFooter {data} page="{{step, offset}}"/>
 </div>
 
 <style>

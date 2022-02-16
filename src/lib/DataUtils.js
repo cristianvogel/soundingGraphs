@@ -1,5 +1,5 @@
 import { op, table} from 'arquero';
-
+import Case2Case from "$lib/Case2Case.js";
 
 /**
  * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
@@ -19,6 +19,15 @@ function normalize_column(name) {
 }
 
 //////////////////
+
+export function toCamelCase( text ) {
+    return Case2Case({
+        input: text,
+        stripRegexp:  /[^A-Z0-9]/gi,
+        type: 'Capital Case',
+        inputOptions:  ['joinUnderscores', 'normalize']
+    })
+}
 
 export function columnCount( dataColumns ) {
     const arqueroTable = table(dataColumns)
@@ -41,7 +50,8 @@ export function toFloat( v ) {
 export function transposeRowsToColumns( m = [] ) { return m[0].map((x,i) => m.map(x => x[i])) }
 
 /**
- * Wrapper to conform the old TT data types into something more JSON and graph friendly
+ * Home grown wrapper to conform the old TT data types into something more JSON and graph friendly
+ * todo: figure out how to do same with Arquero verbs
  * @param metaKey a Key to use as header , read from
  * @param metaData an object which should contain some data for prop defined as metaKey
  * @param columnData this data array will be the value of the metaKey prop

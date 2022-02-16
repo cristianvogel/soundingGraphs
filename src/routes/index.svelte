@@ -1,5 +1,5 @@
 <script>
-    import {dataSets} from "../stores/dataSetsStore.js";
+    import {dataSets} from "../lib/stores/dataSetsStore.js";
     import ProjectBox from "../components/ProjectBox.svelte";
 </script>
 

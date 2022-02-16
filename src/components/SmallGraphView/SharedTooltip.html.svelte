@@ -6,7 +6,8 @@
     import { getContext } from 'svelte';
     import { format } from 'd3-format';
     import QuadTree from './QuadTree.html.svelte';
-    const { data, width, yScale, config } = getContext('LayerCake');
+    const { data, width, yScale, config } = getContext('LayerCake')
+
     /** @type {String} header label text
      *
      */
@@ -34,7 +35,7 @@
 
     /** @type {Array} [dataset] - The dataset to work off of—defaults to $data if left unset. You can pass something custom in here in case you don't want to use the main data or it's in a strange format. */
     export let dataset = undefined;
-    export let colours = { bg: 'black' , fg: 'white' };
+    export let colours ;
 
     const w = 240;
     const w2 = w / 2;
