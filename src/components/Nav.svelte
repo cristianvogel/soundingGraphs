@@ -23,18 +23,19 @@
                     <Icon icon="mdi-light:home" class="m-2 is-size-4" /> Home
                 </a>
             </Hint>
-            <Hint text='Enter app flow' >
-                <a class="navbar-item" href="/twotone" media="screen" aria-label="launch app">
-                    <Icon icon="mdi-card-text"  class="m-2 is-size-5"/> App
+            <Hint text='Recent Projects' >
+                <a class="navbar-item" href="/app" media="screen" aria-label="recent projects">
+                    <Icon icon="mdi-card-text"  class="m-2 is-size-4"/> Recent
                 </a>
             </Hint>
+            <Hint text="Documentation">
             <a class="navbar-item" href="/documentation" media="screen" aria-label="documentation">
-                <Icon icon="mdi-book-open-outline" class="m-2 is-size-5" /> Documentation
+                <Icon icon="mdi-book-open-outline" class="m-2 is-size-5" /> Docs
             </a>
-
+            </Hint>
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link" aria-label="More">
-                    <Icon icon="mdi-looks" class="m-2 is-size-5"/>    More
+                    <Icon icon="mdi-looks" class="m-2 is-size-5"/> More
                 </a>
 
                 <div class="navbar-dropdown">

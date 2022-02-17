@@ -1,23 +1,13 @@
+<!-- main app UI -->
+<svelte:head>
+    <title>devdevdev</title>
+</svelte:head>
 <script>
-    import {dataSets} from "../lib/stores/dataSetsStore.js";
-    import ProjectBox from "../components/ProjectBox.svelte";
+    import TrackOverview from "../components/DataSetOverview/TrackOverview.svelte";
 </script>
 
-<svelte:head>
-    <title>Welcome</title>
-</svelte:head>
-
-    <h1 class="title">
-        Recent Projects
-    </h1>
-
-{#each $dataSets as dataset , index}
-    <div class="box columns m-2">
-         <ProjectBox {index} {dataset}/>
-    </div>
-{/each}
+    <TrackOverview />
 
 
-<style>
 
-</style>
+

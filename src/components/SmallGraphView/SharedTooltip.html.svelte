@@ -4,18 +4,12 @@
  -->
 <script>
     import { getContext } from 'svelte';
+    import { fade } from "svelte/transition";
     import { format } from 'd3-format';
     import QuadTree from './QuadTree.html.svelte';
     const { data, width, yScale, config } = getContext('LayerCake')
 
-    /** @type {String} header label text
-     *
-     */
     export let header;
-
-    /** @type {Colour} colour tint
-     *
-     */
     export let tint = '#111';
 
     const commas = format(',');
@@ -68,25 +62,10 @@
         background: rgba(255, 255, 255, 0.85);
         transform: translate(-50%, -100%);
         padding: 5px;
-        z-index: 1500;
         pointer-events: none;
+        z-index: 100;
     }
-    /*.line {*/
-    /*    position: absolute;*/
-    /*    top: 0;*/
-    /*    bottom: 0;*/
-    /*    width: 1px;*/
-    /*    border-left: 1px dotted #333;*/
-    /*    pointer-events: none;*/
-    /*}*/
-    .tooltip,
-    .line {
-        transition: left 250ms ease-out, top 250ms ease-out;
-    }
-    .title {
-        font-weight: bold;
-        font-size: medium;
-    }
+
     .key {
         color: #999;
     }
@@ -103,17 +82,15 @@
 >
     {@const foundSorted = sortResult(found)}
     {#if visible === true }
-        <div
+        <div transition:fade
                 class="tooltip"
-                style="
-                        width:{w}px;
-                        display: { visible ? 'block' : 'none' };
-                        top:{offset}px;
-                        left:{Math.min(Math.max(w2, x), $width - w2)}px;
-                    "
-        >
-            <span class="is-size-3" style="color: {colours.bg}">◉️</span>
-            <span class="has-text-left has-text-weight-semibold is-size-6" style="color: {colours.fg}" >{formatTitle(header)}</span>
+                style="width:{w}px;
+                       top:{offset}px;
+                       left:{Math.min(Math.max(w2, x), $width - w2)}px;">
+            <span class="is-size-3"
+                  style="color: {tint}">◉️</span>
+            <span class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
+                {formatTitle(header)}</span>
             {#each foundSorted as row}
                 <div class="row"><span class="key">{formatKey(row.key)}∙</span> {formatValue(row.value)}</div>
             {/each}

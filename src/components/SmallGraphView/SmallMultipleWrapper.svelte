@@ -4,6 +4,8 @@
     import Labels from './GroupLabels.html.svelte';
     import {interpolateRainbow} from "d3-scale-chromatic";
     import Line from './Line.svelte';
+    import {getContext} from "svelte";
+    import {get} from "svelte/store";
 
     export let data;
     export let fullExtents;
@@ -11,13 +13,16 @@
     export let normStep = 0;
     export let header;
     export let step;
-    const colours = {bg: interpolateRainbow(normStep ** 2), fg: '#111'}
+    const colours = getContext('colour.mapping')()
+    let tints = get(colours)
+    const tint = ( n ) => tints.bg( n )
+
 </script>
 
 <LayerCake
         ssr={true}
         percentRange={true}
-        padding={{ top: 2, right: 6, bottom: 2, left: 6 }}
+        padding={{ top: 2, right: 2, bottom: 2, left: 2 }}
         x={extentGetters.x}
         y={extentGetters.y}
         {data}
@@ -27,7 +32,7 @@
 >
     <ScaledSvg>
         <Line
-                stroke={colours.bg}
+                stroke={tint(normStep)}
         />
     </ScaledSvg>
     <Html>
@@ -35,7 +40,7 @@
     <SharedTooltip
             dataset={data}
             {header}
-            {colours}
+            tint = {tint(normStep)}
     />
     </Html>
 </LayerCake>

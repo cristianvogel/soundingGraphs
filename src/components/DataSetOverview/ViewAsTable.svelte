@@ -5,9 +5,11 @@
     import DataSetFooter from "./DataSetFooter.svelte";
     import { __tableViewState } from '$lib/stores/generalStores.js'
     import { get } from 'svelte/store'
-    import {interpolateRainbow} from "d3-scale-chromatic";
-    import { color } from 'd3-color'
-    import {setContext} from "svelte";
+    import {getContext, setContext} from "svelte";
+
+    const colours = getContext('colour.mapping')()
+    let tints = get(colours)
+    const tint = ( n ) => tints.bgDarker( n )
 
     export let data = {}
     export let index = 0;
@@ -15,7 +17,7 @@
 
     const numberRows = rowCount(data);
     const visible = __tableViewState();
-    const tint = ( i ) =>  color( interpolateRainbow(i ** 2)).darker(0.5)
+
 
     let offset = 0, step = 10, direction = 1
 

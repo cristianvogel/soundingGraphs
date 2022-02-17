@@ -51,7 +51,8 @@ let dataSetsIndex = [
         id: ':sample:mars-weather-report-feb14-20-2019',
         permanent: true,
         metadata: {
-            title: 'Mars Weather Report Feb 24-20 2019'
+            title: 'Mars Weather Report Feb 24-20 2019',
+            source: 'https://mars.nasa.gov/msl/weather/'
         },
         attachments: {
             data: () => import('./mars-weather-report-feb14-20-2019.json')
@@ -62,7 +63,8 @@ let dataSetsIndex = [
         id: ':sample:un-cities-indicator-index',
         permanent: true,
         metadata: {
-            title: 'UN Sustainable Development Goals Index - US Cities'
+            title: 'UN Sustainable Development Goals Index - US Cities',
+            source: 'https://databank.worldbank.org/source/sustainable-development-goals-(sdgs)'
         },
         attachments: {
             data: () => import('./un-cities-indicator-index.json')

@@ -62,7 +62,7 @@
         on:mouseout="{() => visible = false}"
         on:blur="{() => visible = false}"
 ></div>
-<!-- todo: figure out if screen is at hiDpi because the X doesnt map-->
+
 <slot
         x={xGetter(found)  || 0}
         y={yGetter(found) || 0}

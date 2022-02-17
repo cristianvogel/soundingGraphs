@@ -8,10 +8,11 @@
 
 
     export let data = {};  // dataset shaped as columns with keys: headers values: column-data
-    export let index;
+    export let source = 'unknown';
     let pointSeries = [];
     let fullExtents = [];
-    let containerHeight = 12.5 * (columnCount(data));
+    const containerHeight = Math.min( 18 * (columnCount(data)+1), 1000); // hand tuned for layout
+    const smallMultipleHeight = Math.max( 50, containerHeight/20); // prob better to compute...
 
     // on mount, transform the headers and column data shape to a generic XY for plotting overviews
     onMount( () =>
@@ -31,12 +32,12 @@
 
 </script>
 
-<div  class="group-container" style="height: {containerHeight}px">
+<div  class="group-container" style="height: {containerHeight + 18}px">
     {#if pointSeries}
     {#each pointSeries as data, step}
         {@const normStep = (step - 1) / (pointSeries.length - 1)}
         {@const header = normalizeText(headers[step])}
-        <div class="chart-container mt-1" style="height: {Math.max( 50, containerHeight/20)}px">
+        <div class="chart-container mt-3" style="height: {smallMultipleHeight}px">
             <SmallMultipleWrapper
                     {extentGetters}
                     {data}
@@ -47,6 +48,13 @@
             />
         </div>
     {/each}
+        <div class="subtitle p-3 is-size-7"> Source:
+            {#if (source === 'unknown' || source === undefined) }
+                <span aria-label="unknown data source">unknown</span>
+            {:else }
+                {@html "<a aria-label='link to data source' href=" + source + ">link</a>" }
+            {/if}
+        </div>
     {/if}
 </div>
 

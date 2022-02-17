@@ -9,7 +9,7 @@
 {#if $dataSets.length}
     {#each $dataSets as metadata, index }
         <thead class="tableTitle">{normalizeText(metadata.title)}</thead>
-        <SmallMultiples data={metadata.columnsWithHeaders} {index} />
+        <SmallMultiples data={metadata.columnsWithHeaders} source={metadata.source} />
         <ViewAsTable data={metadata.columnsWithHeaders} {index} />
     {/each}
 {/if}
