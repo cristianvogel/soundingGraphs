@@ -1,20 +1,10 @@
 <script>
-    import {onDestroy, onMount} from "svelte";
+    import {onDestroy} from "svelte";
     export let index, dataset;
-
-    onMount(()=>
-    {
-        /*
-            leaving this code here for a while, as reminder of how to pass context in Svelte
-         */
-            // const ctx = canvas.getContext('2d');
-            // if( ctx ) barChart(ctx, metadataObject);
-    });
 
     onDestroy(()=>{
         //clean up
     });
-
 
 </script>
 

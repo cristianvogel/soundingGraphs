@@ -13,7 +13,7 @@
 
 {#each $dataSets as dataset , index}
     <div class="box columns m-2">
-         <ProjectBox {RecentProjects} {dataset}/>
+         <ProjectBox {index} {dataset}/>
     </div>
 {/each}
 
