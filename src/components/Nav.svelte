@@ -24,7 +24,7 @@
                 </a>
             </Hint>
             <Hint text='Recent Projects' >
-                <a class="navbar-item" href="/app" media="screen" aria-label="recent projects">
+                <a class="navbar-item" href="/recentProjects" media="screen" aria-label="recent projects">
                     <Icon icon="mdi-card-text"  class="m-2 is-size-4"/> Recent
                 </a>
             </Hint>
