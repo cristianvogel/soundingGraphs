@@ -10,6 +10,8 @@
     const { data, xGet, yGet } = getContext('LayerCake');
 
     export let stroke = '#111';
+    export let highlight = false;
+
     let xy={x:0, y:0}
     let path = 'M' + $data
         .map( (el, i) => {
@@ -30,13 +32,18 @@
     path = path.replace(regex, subst).replace(regex2, 'm 0 0' );
 
 </script>
-    <path class='path-line' d='{path}' {stroke}></path>
+
+    <path class="path-line {highlight ? 'selected' : ''}" d='{path}' {stroke}></path>
 <style>
     .path-line {
         fill: none;
         stroke-linejoin: round;
         stroke-linecap: round;
         stroke-width: 0.15em;
+    }
+
+    .selected {
+       /*put selected css styling here*/
     }
 </style>
 

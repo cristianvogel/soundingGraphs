@@ -17,11 +17,10 @@
 
     const colours = getContext('colour.mapping')()
     let tints = get(colours)
-    let highlight = '';
-    const tint = ( n ) => tints.bg( n )
+    let highlight = false;
 
     function handleSmallGraphClicked( e ) {
-        highlight = e.detail.selected ? tint(normStep) : ''
+        highlight = e.detail.selected
         console.log('selected '+ e.detail.text )
     }
 </script>
@@ -38,16 +37,16 @@
         yDomain ={fullExtents}
         pointerEvents = true
 >
-    <Labels {header} {highlight}/>
+    <Labels {header} {tints} {highlight} {normStep}  />
     <ScaledSvg viewBox='0 0 100 100'>
-         <Line stroke={ tint( normStep )} />
+         <Line stroke={ tints[highlight ? 'bgDarker' : 'bg']( normStep )} {highlight }/>
     </ScaledSvg>
 
     <Html>
     <SharedTooltip
             dataset={data}
             {header}
-            tint = {tint(normStep)}
+            tint = {tints.bg(normStep)}
             on:smallGraph.clicked={handleSmallGraphClicked}
             on:smallGraph.clicked
     />
@@ -55,3 +54,6 @@
 </LayerCake>
 
 
+<style>
+
+</style>

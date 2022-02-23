@@ -54,7 +54,7 @@
             {@const normStep = (step - 1) / (pointSeries.length - 1) }
             {@const header = (headers[step]) }
             <div class="chart-container mt-3"
-                 style="height: {smallMultipleHeight}px;">
+                 style="height: {smallMultipleHeight}px; cursor: pointer;">
                 <SmallMultipleWrapper
                         {extentGetters}
                         {data}
@@ -76,7 +76,6 @@
         </div>
     {/if}
 </div>
-
 
 <style>
     /*

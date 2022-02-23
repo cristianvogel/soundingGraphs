@@ -44,7 +44,6 @@
                 value: result[key]
             };
         }).sort((a, b) => b.value - a.value);
-
         return rows;
     }
 
@@ -60,7 +59,7 @@
         background: rgba(255, 255, 255, 0.85);
         transform: translate(-25%, -100%);
         padding: 5px;
-        pointer-events: none;
+        /*pointer-events: none;*/
         z-index: 100;
     }
 
@@ -85,9 +84,10 @@
     {#if visible === true }
         <div transition:fade
              class="tooltip"
-             style="width:{w}px;
-                       top:{offset}px;
-                       left:{Math.min(Math.max(w2, x), $width - w2)}px"
+             style="    width:{w}px;
+                        top:{offset}px;
+                        left:{Math.min(Math.max(w2, x), $width - w2)}px;
+                    "
         >
             <span class="is-size-3"
                   style="color: {tint}">◉️</span>

@@ -8,6 +8,7 @@
 
 	setContext( 'colour.mapping', __colourMapping)
 
+
 </script>
 <Nav/>
 <section class="container has-background-grey-light p-6">
