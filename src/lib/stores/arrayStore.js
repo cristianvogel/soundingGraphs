@@ -1,6 +1,8 @@
 // custom arrayStore by miu
 
-import { writable } from 'svelte/store';
+import { writable} from 'svelte/store';
+import {addFunction, op} from 'arquero'
+
 
 export function arrayStore(value = []) {
   const store = writable(value);
@@ -16,6 +18,30 @@ export function arrayStore(value = []) {
     };
   };
 
+  // use this one for standard Arquero lib ops
+  const wrapOp = (method) => {
+    return (...args) => {
+      let ret;
+      // console.log('arg: '+arg + ' op: '+op[method].name)
+      store.update((value) => {
+        ret = op[method]( value, ...args);
+        return value;
+      });
+      return ret;
+    };
+  };
+
+
+  function prune( arr, el ) {
+    arr.forEach( (_el, _idx, _arr) => {
+      if ( el === _el ) arr.splice( _idx, 1)
+    })
+    return arr
+  }
+
+//https://uwdata.github.io/arquero/api/extensibility
+  addFunction('prune', prune, { override: true })
+
   return {
     ...store,
     push: wrap('push'),
@@ -25,5 +51,8 @@ export function arrayStore(value = []) {
     reverse: wrap('reverse'),
     slice: wrap('slice'),
     splice: wrap('splice'),
+    prune: wrapOp('prune')
   };
 }
+
+// ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#spread_in_function_calls

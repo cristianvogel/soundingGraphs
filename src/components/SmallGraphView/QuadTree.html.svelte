@@ -5,14 +5,21 @@
   The quadtree searches across both the x and y dimensions at the same time. But if you want to only search across one, set the `x` and `y` props to the same value. For example, the [shared tooltip component](https://layercake.graphics/components/SharedTooltip.html.svelte) sets `y='x'` since it's nicer behavior to only pick up on the nearest x-value.
  -->
 <script>
-    import { getContext } from 'svelte';
+    import {createEventDispatcher, getContext} from 'svelte';
     import { quadtree } from 'd3-quadtree';
+    import Icon from "@iconify/svelte";
+    import { fade } from "svelte/transition"
 
     const { data, xGet, yGet, width, height } = getContext('LayerCake');
+
+    const view = { selected: false }
 
     let visible = false;
     let found = {};
     let e = {};
+
+    /** @type {String} table header passed down from SharedToolTip */
+    export let header = '';
 
     /** @type {String} [x='x'] – The dimension to search across when moving the mouse left and right. */
     export let x = 'x';
@@ -28,6 +35,16 @@
 
     $: xGetter = x === 'x' ? $xGet : $yGet;
     $: yGetter = y === 'y' ? $yGet : $xGet;
+
+    const dispatch = createEventDispatcher();
+
+    function graphClicked() {
+        view.selected = !view.selected
+        dispatch('smallGraph.clicked', {
+            text: header,
+            selected: view.selected
+        });
+    }
 
     function findItem (evt) {
         e = evt;
@@ -46,6 +63,27 @@
         .addAll(dataset || $data);
 </script>
 
+<div
+        class="bg"
+        on:mousemove="{findItem}"
+        on:mouseout="{() => visible = false}"
+        on:blur="{() => visible = false}"
+        on:click={graphClicked}
+>
+    {#if view.selected}
+        <div transition:fade>
+          <Icon icon="mdi-progress-check"  class="is-size-2 has-background-success-light is-pulled-right" style="opacity: 0.9"/>
+        </div>
+    {/if}
+</div>
+<slot
+        x={xGetter(found)  || 0}
+        y={yGetter(found) || 0}
+        {found}
+        {visible}
+        {e}
+></slot>
+
 <style>
     .bg {
         position: absolute;
@@ -55,18 +93,3 @@
         left: 0;
     }
 </style>
-
-<div
-        class="bg"
-        on:mousemove="{findItem}"
-        on:mouseout="{() => visible = false}"
-        on:blur="{() => visible = false}"
-></div>
-
-<slot
-        x={xGetter(found)  || 0}
-        y={yGetter(found) || 0}
-        {found}
-        {visible}
-        {e}
-></slot>

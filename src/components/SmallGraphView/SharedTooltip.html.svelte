@@ -28,8 +28,7 @@
     export let offset = -20;
 
     /** @type {Array} [dataset] - The dataset to work off of—defaults to $data if left unset. You can pass something custom in here in case you don't want to use the main data or it's in a strange format. */
-    export let dataset = undefined;
-    export let colours ;
+    export let dataset ;
 
     const w = 240;
     const w2 = w / 2;
@@ -49,7 +48,6 @@
         return rows;
     }
 
-
 </script>
 
 <style>
@@ -60,7 +58,7 @@
         border: 1px solid #ccc;
         border-radius: 6px;
         background: rgba(255, 255, 255, 0.85);
-        transform: translate(-50%, -100%);
+        transform: translate(-25%, -100%);
         padding: 5px;
         pointer-events: none;
         z-index: 100;
@@ -72,7 +70,9 @@
 </style>
 
 <QuadTree
+        on:smallGraph.clicked
         dataset={dataset || $data}
+        {header}
         y='x'
         let:x
         let:y
@@ -80,13 +80,15 @@
         let:found
         let:e
 >
+
     {@const foundSorted = sortResult(found)}
     {#if visible === true }
         <div transition:fade
-                class="tooltip"
-                style="width:{w}px;
+             class="tooltip"
+             style="width:{w}px;
                        top:{offset}px;
-                       left:{Math.min(Math.max(w2, x), $width - w2)}px;">
+                       left:{Math.min(Math.max(w2, x), $width - w2)}px"
+        >
             <span class="is-size-3"
                   style="color: {tint}">◉️</span>
             <span class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">

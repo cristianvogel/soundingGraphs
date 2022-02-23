@@ -1,5 +1,4 @@
 import { op, table} from 'arquero';
-import Case2Case from "$lib/Case2Case.js";
 
 /**
  * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
@@ -16,17 +15,6 @@ function normalize_column(name) {
         .replace(/_+/g, '_')               // collapse repeated underscores
         .normalize('NFD')                  // perform unicode normalization
         .replace(/[\u0300-\u036f]/g, '');  // strip accents from characters
-}
-
-//////////////////
-
-export function toCamelCase( text ) {
-    return Case2Case({
-        input: text,
-        stripRegexp:  /[^A-Z0-9]/gi,
-        type: 'Capital Case',
-        inputOptions:  ['joinUnderscores', 'normalize']
-    })
 }
 
 export function columnCount( dataColumns ) {
@@ -89,8 +77,3 @@ export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" :
     xy.forEach(t => result.push(t.objects()))
     return result
 }
-
-
-
-
-

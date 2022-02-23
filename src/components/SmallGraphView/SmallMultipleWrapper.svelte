@@ -1,8 +1,9 @@
 <script>
+    // https://layercake.graphics/guide
+
     import {LayerCake, ScaledSvg, Html, flatten} from 'layercake';
     import SharedTooltip from './SharedTooltip.html.svelte';
     import Labels from './GroupLabels.html.svelte';
-    import {interpolateRainbow} from "d3-scale-chromatic";
     import Line from './Line.svelte';
     import {getContext} from "svelte";
     import {get} from "svelte/store";
@@ -13,15 +14,21 @@
     export let normStep = 0;
     export let header;
     export let step;
+
     const colours = getContext('colour.mapping')()
     let tints = get(colours)
+    let highlight = '';
     const tint = ( n ) => tints.bg( n )
 
+    function handleSmallGraphClicked( e ) {
+        highlight = e.detail.selected ? tint(normStep) : ''
+        console.log('selected '+ e.detail.text )
+    }
 </script>
 
 <LayerCake
         ssr={true}
-        percentRange={true}
+        percentRange={false}
         padding={{ top: 2, right: 2, bottom: 2, left: 2 }}
         x={extentGetters.x}
         y={extentGetters.y}
@@ -29,19 +36,22 @@
         flatData = {flatten(data)}
         xDomain = {fullExtents}
         yDomain ={fullExtents}
+        pointerEvents = true
 >
-    <ScaledSvg>
-        <Line
-                stroke={tint(normStep)}
-        />
+    <Labels {header} {highlight}/>
+    <ScaledSvg viewBox='0 0 100 100'>
+         <Line stroke={ tint( normStep )} />
     </ScaledSvg>
+
     <Html>
-    <Labels header = {header}/>
     <SharedTooltip
             dataset={data}
             {header}
             tint = {tint(normStep)}
+            on:smallGraph.clicked={handleSmallGraphClicked}
+            on:smallGraph.clicked
     />
     </Html>
 </LayerCake>
+
 

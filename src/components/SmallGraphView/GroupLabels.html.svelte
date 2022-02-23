@@ -9,6 +9,7 @@
     const { data, x, y, xScale, yScale, xRange, yRange, z } = getContext('LayerCake');
 
     export let header = '';
+    export let highlight = ''
 
     header = header.slice(0,8) + '…'
     /* --------------------------------------------
@@ -29,6 +30,7 @@
             style="
                   top:{top(group.values) * 100}%;
                   left:{left(group.values) * 100}%;
+                  background-color: {highlight}
                 "
     >{header || '' }</div>
 {/each}

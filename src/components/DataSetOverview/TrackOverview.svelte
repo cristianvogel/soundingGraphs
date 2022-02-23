@@ -3,8 +3,5 @@
 </script>
 
 <div class="box">
-    <div class="table-container">
-            <DatasetOverviewsPage />
-    </div>
+    <DatasetOverviewsPage />
 </div>
-
