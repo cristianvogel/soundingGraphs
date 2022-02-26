@@ -2,7 +2,7 @@
     // https://layercake.graphics/guide
 
     import {LayerCake, ScaledSvg, Html, flatten} from 'layercake';
-    import SharedTooltip from './SharedTooltip.html.svelte';
+    import InteractiveInfoBox from './InteractiveInfoBox.html.svelte';
     import Labels from './GroupLabels.html.svelte';
     import Line from './Line.svelte';
     import {getContext} from "svelte";
@@ -14,6 +14,7 @@
     export let normStep = 0;
     export let header;
     export let step;
+    export let tableTitle;
 
     const colours = getContext('colour.mapping')()
     let tints = get(colours)
@@ -21,7 +22,6 @@
 
     function handleSmallGraphClicked( e ) {
         highlight = e.detail.selected
-        console.log('selected '+ e.detail.text )
     }
 </script>
 
@@ -43,17 +43,13 @@
     </ScaledSvg>
 
     <Html>
-    <SharedTooltip
+    <InteractiveInfoBox
             dataset={data}
             {header}
+            {tableTitle}
             tint = {tints.bg(normStep)}
             on:smallGraph.clicked={handleSmallGraphClicked}
             on:smallGraph.clicked
     />
     </Html>
 </LayerCake>
-
-
-<style>
-
-</style>

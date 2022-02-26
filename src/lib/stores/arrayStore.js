@@ -1,8 +1,7 @@
-// custom arrayStore by miu
+// custom arrayStore by miunau , extended by CAV
 
 import { writable} from 'svelte/store';
 import {addFunction, op} from 'arquero'
-
 
 export function arrayStore(value = []) {
   const store = writable(value);
@@ -18,11 +17,10 @@ export function arrayStore(value = []) {
     };
   };
 
-  // use this one for standard Arquero lib ops
+  // use this one for Arquero stdlib ops
   const wrapOp = (method) => {
     return (...args) => {
-      let ret;
-      // console.log('arg: '+arg + ' op: '+op[method].name)
+      let ret; // console.log('arg: '+arg + ' op: '+op[method].name)
       store.update((value) => {
         ret = op[method]( value, ...args);
         return value;
@@ -31,15 +29,19 @@ export function arrayStore(value = []) {
     };
   };
 
-
+  /**
+   * @param arr can be an Array or Array of Objects uses Arquero join semantics
+   * @param el element to prune
+   * @returns {*} pruned Array
+   */
   function prune( arr, el ) {
-    arr.forEach( (_el, _idx, _arr) => {
-      if ( el === _el ) arr.splice( _idx, 1)
-    })
+        arr.forEach( (_el, _idx, _arr) => {
+          if (op.equal(_el, el)) arr.splice(_idx, 1)
+        })
     return arr
   }
 
-//https://uwdata.github.io/arquero/api/extensibility
+// https://uwdata.github.io/arquero/api/extensibility
   addFunction('prune', prune, { override: true })
 
   return {

@@ -45,6 +45,7 @@
 		"layercake": "^6.0.2",
 		"marked": "^4.0.12",
 		"plot": "^1.0.22",
-		"svelte-hint": "^1.0.0-rc.2"
+		"svelte-hint": "^1.0.0-rc.2",
+		"tone": "^14.7.77"
 	}
 }

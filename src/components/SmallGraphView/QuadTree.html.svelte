@@ -7,13 +7,10 @@
 <script>
     import {createEventDispatcher, getContext} from 'svelte';
     import { quadtree } from 'd3-quadtree';
-    import Icon from "@iconify/svelte";
     import { fade } from "svelte/transition"
+    import Icon from "@iconify/svelte";
 
     const { data, xGet, yGet, width, height } = getContext('LayerCake');
-
-    const view = { selected: false }
-
     let visible = false;
     let found = {};
     let e = {};
@@ -31,7 +28,10 @@
     export let searchRadius = undefined;
 
     /** @type {Array} [dataset] – The dataset to work off of—defaults to $data if left unset. You can pass override the default here in here in case you don't want to use the main data or it's in a strange format. */
+    const view = { selected: false }
     export let dataset = undefined;
+    export let tableTitle = 'data';
+    export let tint = "rgba(20,20,20,0.8)";
 
     $: xGetter = x === 'x' ? $xGet : $yGet;
     $: yGetter = y === 'y' ? $yGet : $xGet;
@@ -41,8 +41,10 @@
     function graphClicked() {
         view.selected = !view.selected
         dispatch('smallGraph.clicked', {
-            text: header,
-            selected: view.selected
+            label: header,
+            colour: tint,
+            selected: view.selected,
+            tableTitle: tableTitle
         });
     }
 
@@ -61,6 +63,7 @@
         .x(xGetter)
         .y(yGetter)
         .addAll(dataset || $data);
+
 </script>
 
 <div
@@ -72,7 +75,7 @@
 >
     {#if view.selected}
         <div transition:fade>
-          <Icon icon="mdi-progress-check"  class="is-size-2 has-background-success-light is-pulled-right" style="opacity: 0.9"/>
+        <Icon icon="mdi-progress-check"  class="is-size-2 has-background-success-light is-pulled-right" style="color: {tint}; opacity: 0.85"/>
         </div>
     {/if}
 </div>
@@ -92,4 +95,5 @@
         bottom: 0;
         left: 0;
     }
+
 </style>

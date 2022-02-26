@@ -1,12 +1,14 @@
 <!--
   @component
-  Generates a tooltip that works on multiseries datasets, like multiline charts. It creates a tooltip showing the name of the series and the current value. It finds the nearest data point using the [QuadTree.html.svelte](https://layercake.graphics/components/QuadTree.html.svelte) component.
+  Generates a tooltip that works on multiseries datasets, like multiline charts. It creates a tooltip showing the name of the series and the current value. It finds the nearest data point using the [GraphInteraction.html.svelte](https://layercake.graphics/components/QuadTree.html.svelte) component.
  -->
 <script>
     import { getContext } from 'svelte';
-    import { fade } from "svelte/transition";
     import { format } from 'd3-format';
-    import QuadTree from './QuadTree.html.svelte';
+    import GraphInteraction from './QuadTree.html.svelte';
+    import OvalMark from "../GraphicalExtras/OvalMark.svelte";
+    import { fade } from "svelte/transition";
+
     const { data, width, yScale, config } = getContext('LayerCake')
 
     export let header;
@@ -28,7 +30,8 @@
     export let offset = -20;
 
     /** @type {Array} [dataset] - The dataset to work off of—defaults to $data if left unset. You can pass something custom in here in case you don't want to use the main data or it's in a strange format. */
-    export let dataset ;
+    export let dataset = [] ;
+    export let tableTitle = 'data';
 
     const w = 240;
     const w2 = w / 2;
@@ -49,7 +52,48 @@
 
 </script>
 
+<GraphInteraction
+        on:smallGraph.clicked
+        dataset={dataset || $data}
+        {header}
+        {tableTitle}
+        {tint}
+        y='x'
+        let:x
+        let:y
+        let:visible
+        let:found
+        let:e
+>
+    {@const foundSorted = sortResult(found)}
+    {#if visible === true }
+        <div in:fade="{{ duration: 50 }}" out:fade="{{ delay: 20, duration: 200}}"
+             class="tooltip"
+             style="    width:{w}px;
+                        top:{offset}px;
+                        left:{Math.min(Math.max(w2, x), $width - w2)}px;
+                    "
+        >
+            <div class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
+                {formatTitle(header)}</div>
+            {#each foundSorted as row}
+                <div class="row"><span class="key">{formatKey(row.key)}∙</span> {formatValue(row.value)}</div>
+            {/each}
+            <nav class="level">
+                <OvalMark {tint} _class="level-left"/>
+                <div class="subtitle level-right is-pulled-right">click to select</div>️
+            </nav>
+        </div>
+    {/if}
+</GraphInteraction>
+
 <style>
+    .circleMark {
+        border-bottom:3em solid;
+        border-radius: 1.5em;
+        border-right:3em solid transparent;
+    }
+
     .tooltip {
         position: absolute;
         font-size: 13px;
@@ -67,35 +111,3 @@
         color: #999;
     }
 </style>
-
-<QuadTree
-        on:smallGraph.clicked
-        dataset={dataset || $data}
-        {header}
-        y='x'
-        let:x
-        let:y
-        let:visible
-        let:found
-        let:e
->
-
-    {@const foundSorted = sortResult(found)}
-    {#if visible === true }
-        <div transition:fade
-             class="tooltip"
-             style="    width:{w}px;
-                        top:{offset}px;
-                        left:{Math.min(Math.max(w2, x), $width - w2)}px;
-                    "
-        >
-            <span class="is-size-3"
-                  style="color: {tint}">◉️</span>
-            <span class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
-                {formatTitle(header)}</span>
-            {#each foundSorted as row}
-                <div class="row"><span class="key">{formatKey(row.key)}∙</span> {formatValue(row.value)}</div>
-            {/each}
-        </div>
-    {/if}
-</QuadTree>

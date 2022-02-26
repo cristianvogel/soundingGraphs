@@ -8,6 +8,7 @@
 <script>
     import { getContext } from 'svelte';
     import { op } from 'arquero';
+    import { TRIM } from '$lib/Globals.js'
 
     const { data, x, y, xScale, yScale, xRange, yRange, z } = getContext('LayerCake');
 
@@ -18,7 +19,7 @@
 
     const labelColours = { bg: tints.bgDarker(normStep , 2), fg: tints.bgBrighter(normStep, 3 ) }
 
-    header = header.slice(0,8) + '…'
+    header = header.slice(0, TRIM) + ( header.length > TRIM ? '…' : '' )
     /* --------------------------------------------
      * Title case the first letter
      */
@@ -30,24 +31,26 @@
     $: left = values => $xScale(op.greatest(values)) /  Math.max(...$xRange);
     $: top = values => $yScale(op.greatest(values)) / Math.max(...$yRange);
 </script>
-
+<div class="level">
 {#each $data as group}
-    <div
-            class="label"
-            style="
-                  top:{top(group.values) * 100}%;
-                  left:{left(group.values) * 100}%;
-                  background-color: {highlight ? labelColours.bg : 'transparent'};
-                  color:  {highlight ? labelColours.fg : 'black'};
-                  font-weight: {highlight ? 'bolder' : 'normal'}
-                "
-    >{header || '' }</div>
-{/each}
+        <div
+                class="label level-left"
+                style="
+                      top:{top(group.values) * 100}%;
+                      left:{left(group.values) * 100}%;
+                      background-color: {highlight ? labelColours.bg : 'transparent'};
+                      color:  {highlight ? labelColours.fg : 'grey'};
+                      font-weight: {highlight ? 'bolder' : 'normal'}
+                    "
+        >{header || '' }</div>
 
+        {/each}
+        </div>
 <style>
     .label {
         position: absolute;
         transform: translate(0, -100%)translateY(1px);
         font-size: 12px;
     }
+
 </style>

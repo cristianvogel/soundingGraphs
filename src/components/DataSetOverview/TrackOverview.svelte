@@ -1,5 +1,5 @@
 <script>
-    import DatasetOverviewsPage from "./DatasetOverviewsPage.svelte";
+    import DatasetOverviewsPage from "./GraphsOverviewsPage.svelte";
 </script>
 
 <div class="box">

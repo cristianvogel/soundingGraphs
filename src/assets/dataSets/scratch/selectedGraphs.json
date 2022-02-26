@@ -1,0 +1,52 @@
+[
+    {
+        "label": "Total Production (lbs)",
+        "colour": {
+            "r": 132,
+            "g": 62,
+            "b": 176,
+            "opacity": 1
+        },
+        "tableTitle": "Honey Production in the USA (1998-2012)"
+    },
+    {
+        "label": "Number of Colonies",
+        "colour": {
+            "r": 110,
+            "g": 64,
+            "b": 170,
+            "opacity": 1
+        },
+        "tableTitle": "Honey Production in the USA (1998-2012)"
+    },
+    {
+        "label": "DOT",
+        "colour": {
+            "r": 255,
+            "g": 118,
+            "b": 72,
+            "opacity": 1
+        },
+        "tableTitle": "NYC 311 Call Volume by Agency Feb 1 - 10, 2019"
+    },
+    {
+        "label": "DEP",
+        "colour": {
+            "r": 223,
+            "g": 186,
+            "b": 47,
+            "opacity": 1
+        },
+        "tableTitle": "NYC 311 Call Volume by Agency Feb 1 - 10, 2019"
+    },
+    {
+        "label": "Sol",
+        "colour": {
+            "r": 110,
+            "g": 64,
+            "b": 170,
+            "opacity": 1
+        },
+        "tableTitle": "Mars Weather Report Feb 24-20 2019"
+    }
+]

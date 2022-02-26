@@ -1,18 +1,19 @@
 
 <script>
-    import SmallMultipleWrapper from './SmallMultipleWrapper.svelte';
+    import SmallGraphInstance from './SmallGraphInstance.svelte';
     import {mapDataToXYPoints, columnCount } from "$lib/DataUtils.js";
     import {onMount} from "svelte";
-    import { op } from 'arquero';
+    import {from, op} from 'arquero';
     import {calcExtents, flatten} from "layercake";
     import { selectedGraphs } from "$lib/stores/selectedGraphsStore.js";
-    import { get } from "svelte/store";
 
     export let data = {};  // dataset shaped as columns with keys: headers values: column-data
-    export let source = 'unknown';
-    export let selectedCount = 0;
+    export let source = 'unknown'
+    export let tableTitle = 'Data'
+
     let pointSeries = [];
     let fullExtents = [];
+
     const containerHeight = Math.min( 18 * (columnCount(data)+1), 1000); // hand tuned for layout
     const smallMultipleHeight = Math.max( 50, containerHeight/20); // prob better to compute...
 
@@ -29,20 +30,22 @@
             fullExtents = calcExtents( flatten(pointSeries), extentGetters)
         }
     )
-    $: selected = false;
-    $: selectedCount = 0
-    function handleSmallGraphClicked( e ) {
-        const {text: title} = e.detail
-        const currentSelection = get(selectedGraphs);
-        const prop = op.includes(currentSelection, title, 0)
+    // $: selected = false;
+
+    function handleSmallGraphClicked ( e ) {
+        const { label, colour, tableTitle} = e.detail
+        const entry = { label, colour, tableTitle }
+        const prop = op.includes(from($selectedGraphs).array('label'), label, 0)
+
         if (prop) {
-            selectedGraphs.prune( title )
+            $selectedGraphs = [...selectedGraphs.prune( entry )]
+            console.log('remove from basket: '+ entry)
         } else {
-            selectedGraphs.push( title )
+            $selectedGraphs = [ ...$selectedGraphs, entry ]
+            console.log('add to basket' + entry)
         }
-        selectedCount = currentSelection.length;
-        console.log( currentSelection )
     }
+
     const extentGetters = {'x': d => d.x , 'y': d => d.y }
     const headers = op.keys(data)
 
@@ -55,7 +58,7 @@
             {@const header = (headers[step]) }
             <div class="chart-container mt-3"
                  style="height: {smallMultipleHeight}px; cursor: pointer;">
-                <SmallMultipleWrapper
+                <SmallGraphInstance
                         {extentGetters}
                         {data}
                         {fullExtents}
@@ -63,6 +66,7 @@
                         {header}
                         {step}
                         on:smallGraph.clicked={handleSmallGraphClicked}
+                        {tableTitle}
                 />
 
             </div>
@@ -78,12 +82,6 @@
 </div>
 
 <style>
-    /*
-        The wrapper div needs to have an explicit width and height in CSS.
-        It can also be a flexbox child or CSS grid element.
-        The point being it needs dimensions since the <LayerCake> element will
-        expand to fill it.
-    */
     .chart-container {
         position: relative;
         display: inline-block;

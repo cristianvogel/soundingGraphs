@@ -1,12 +1,17 @@
 <script>
     import Icon from '@iconify/svelte';
     import Hint from "svelte-hint";
+    import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
+    import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
 </script>
 
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
         <a class="navbar-item" href="https://sonify.io">
-            <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">
+<!--            <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
+            <Hint text='Show all the graphs you have selected' >
+                    <GraphBasket/>
+            </Hint>
         </a>
 
         <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
@@ -15,7 +20,7 @@
             <span aria-hidden="true"></span>
         </a>
     </div>
-
+    <VerticalDots/>
     <div id="navbarBasic" class="navbar-menu">
         <div class="navbar-start">
             <Hint text='Home' >
@@ -37,7 +42,6 @@
                 <a class="navbar-link" aria-label="More">
                     <Icon icon="mdi-looks" class="m-2 is-size-5"/> More
                 </a>
-
                 <div class="navbar-dropdown">
                     <Hint text="an interactive tutorial" placement="right" middleware = "[
                           offset(100)">

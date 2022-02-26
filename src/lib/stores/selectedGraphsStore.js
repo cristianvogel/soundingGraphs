@@ -6,4 +6,4 @@ const selectedGraphsStore = (initial) => {
     return store;
 }
 
-export const selectedGraphs = selectedGraphsStore([])
+export let selectedGraphs = selectedGraphsStore([])

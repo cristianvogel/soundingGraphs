@@ -75,5 +75,19 @@ export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" :
         })
     let result = []
     xy.forEach(t => result.push(t.objects()))
-    return result
+    // seems to always return one blank entry...
+
+    return result.slice(0,-1)
+}
+
+/**
+ * @param arr can be an Array or Array of Objects uses Arquero join semantics
+ * @param el element to prune
+ * @returns {*} pruned Array
+ */
+export function prune( arr, el ) {
+    arr.forEach( (_el, _idx, _arr) => {
+        if (op.equal(_el, el)) arr.splice(_idx, 1)
+    })
+    return arr
 }
