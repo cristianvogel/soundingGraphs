@@ -5,7 +5,6 @@
     // the Parent table of each 'Orphaned' child
     // todo: improve layout when there's a lot of selection, modal maybe?
 
-
     import {selectedGraphs} from "$lib/stores/selectedGraphsStore.js";
     import {from, op} from 'arquero';
     import {fade} from 'svelte/transition'

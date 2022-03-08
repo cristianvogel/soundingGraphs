@@ -3,7 +3,7 @@
     import { rowCount, normalizeText} from "$lib/DataUtils.js";
     import TableBody from "./TableBody.svelte";
     import DataSetFooter from "./DataSetFooter.svelte";
-    import { __tableViewState } from '$lib/stores/generalStores.js'
+    import  stores  from '$lib/stores/Stores.ts'
     import { get } from 'svelte/store'
     import {getContext, setContext} from "svelte";
 
@@ -16,7 +16,7 @@
     const size = Object.keys(data).length || 1;
 
     const numberRows = rowCount(data);
-    const visible = __tableViewState();
+    const visible = stores.__tableViewState();
 
 
     let offset = 0, step = 10, direction = 1

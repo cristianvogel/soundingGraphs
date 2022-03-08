@@ -17,9 +17,9 @@
 <script>
     export let post;
     import {interpolateInferno} from "d3-scale-chromatic";
-    import fileIO from "../js/fileIO.js";
+    import fileIO from "../script/fileIO.ts";
     import Icon from '@iconify/svelte';
-    import {noise} from '../js/synthesiseData.js'
+    import {noise} from '../script/synthesiseData'
     import { fly, slide, fade } from 'svelte/transition';
     import {marked} from "marked";
         marked.setOptions({

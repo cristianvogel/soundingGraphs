@@ -4,6 +4,7 @@
     import {fade} from 'svelte/transition';
     import {rowCount} from "$lib/DataUtils.js";
     import {getContext} from "svelte";
+    import Icon from '@iconify/svelte';
 
     export let data = {}
     export let page = {};
@@ -11,8 +12,8 @@
     const {toggleView, visible} = getContext('table.status')
     const {inc, dec} = getContext('table.jump')
     const numberRows = rowCount(data);
-    import Icon from '@iconify/svelte';
-    import ExtraInfo from "./GraphBasket.svelte";
+
+
 
 </script>
 

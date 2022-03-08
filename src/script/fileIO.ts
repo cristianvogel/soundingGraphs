@@ -3,7 +3,7 @@
 import FileSaver from 'file-saver';
 
 const fileIO = {
-    saveBlob: function (data = 'empty', format = 'json') {
+    saveBlob: function (data : string  = 'empty', format: string = 'json') {
         let blob,
             extension = format;
         const serialized = JSON.stringify( data );
@@ -14,6 +14,7 @@ const fileIO = {
             }
             case "csv": {
                 const csv = serialized // todo: csv export isn't really working yet, try to use d3 to format as CSV
+                // @ts-ignore
                 blob = new Blob( [...csv], {type: "text/csv"});
                 break
             }

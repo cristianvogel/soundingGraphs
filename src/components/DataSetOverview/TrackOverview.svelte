@@ -1,7 +1,7 @@
 <script>
-    import DatasetOverviewsPage from "./GraphsOverviewsPage.svelte";
+    import MultipleGraphsView from "./MultipleGraphsView.svelte";
 </script>
 
 <div class="box">
-    <DatasetOverviewsPage />
+    <MultipleGraphsView />
 </div>

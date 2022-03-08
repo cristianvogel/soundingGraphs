@@ -1,8 +1,17 @@
 <script>
+    /**
+     * Component holds the site wide navbar with Icon and text UI elements
+     * connecting to routes and other parts of the program
+     * Built on Bulma NavBar generic template with additional
+     * tooltips provided by Svelte-Hint package
+     */
+
     import Icon from '@iconify/svelte';
     import Hint from "svelte-hint";
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
+    import InitialiseSound from "./Sound/InitialiseSound.svelte";
+
 </script>
 
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
@@ -66,6 +75,7 @@
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
+                    <InitialiseSound />
                     <a class="button is-primary">
                         <strong>Sign up</strong>
                     </a>

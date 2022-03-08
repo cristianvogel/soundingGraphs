@@ -2,8 +2,6 @@
     import { dataSets } from "$lib/stores/dataSetsStore.js";
     import ViewAsTable from "./ViewAsTable.svelte";
     import SmallGraphs from "../SmallGraphView/SmallGraphs.svelte";
-
-
 </script>
 
 {#if $dataSets.length}
