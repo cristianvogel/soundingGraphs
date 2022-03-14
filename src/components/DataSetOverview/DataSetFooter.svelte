@@ -1,10 +1,21 @@
-<script>
+<script lang="ts">
     import Hint from "svelte-hint";
     import {globStyle} from '../../assets/styleDefs.js'
     import {fade} from 'svelte/transition';
     import {rowCount} from "$lib/DataUtils.js";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
+    import {get, Writable} from "svelte/store";
+    import stores from "../../lib/stores/Stores";
+    import AudioEngine from "../../script/audioEngine";
+    import {Sound} from "../../lib/Globals";
+    import engineStateService from "../../lib/stateMachinery/engineStateService"
+    import type Machine from "robot3"
+
+    const engine: Writable<Machine> = engineStateService
+    $: send = $engine.send
+    $: currentEngineState = $engine.machine.current
+    $: soundingStatus = $engine.machine.current === Sound.PLAYING || false
 
     export let data = {}
     export let page = {};
@@ -13,6 +24,18 @@
     const {inc, dec} = getContext('table.jump')
     const numberRows = rowCount(data);
 
+    function handleSonifyClick() {
+        ping()
+    }
+    function ping() {
+        const actx: AudioContext = get(stores.__actx)
+        const engine: AudioEngine = get(stores.__audioEngine)
+        if (actx && engine.getState() !== Sound.UNMOUNTED) {
+            engine.resume()
+            engine.ping()
+            send({type: 'toggle', data: 'SonifyButton'})
+        }
+    }
 
 
 </script>
@@ -58,7 +81,8 @@
         </div>
         <div class="navbar-end p-2">
             <Hint>
-                <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover ">Sonify
+                <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover "
+                on:click={handleSonifyClick}>Sonify
                 </button>
                 <i slot="hint" class={globStyle.toolTip}>Sonify data set</i>
             </Hint>

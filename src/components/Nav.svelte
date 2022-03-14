@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     /**
      * Component holds the site wide navbar with Icon and text UI elements
      * connecting to routes and other parts of the program
@@ -11,9 +11,14 @@
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
     import InitialiseSound from "./Sound/InitialiseSound.svelte";
+    import {Sound} from "../lib/Globals";
+    let soundPlaying: boolean;
+
+    function audioEngineStatusChange( event ) {
+        soundPlaying = event.detail.text === Sound.PLAYING || false
+     }
 
 </script>
-
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
         <a class="navbar-item" href="https://sonify.io">
@@ -70,12 +75,14 @@
                     </a>
                 </div>
             </div>
+            <div class="navbar-item">
+                <InitialiseSound on:sound.status={audioEngineStatusChange}/>
+            </div>
         </div>
-
         <div class="navbar-end">
+
             <div class="navbar-item">
                 <div class="buttons">
-                    <InitialiseSound />
                     <a class="button is-primary">
                         <strong>Sign up</strong>
                     </a>
@@ -87,7 +94,6 @@
         </div>
     </div>
 </nav>
-
 <style>
     .sonify-logo
     {

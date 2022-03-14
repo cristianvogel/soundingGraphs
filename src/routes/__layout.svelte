@@ -5,7 +5,7 @@
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
 	import Elementary from "../script/audioEngine";
-	import {Sound} from "../script/audioEngine";
+	import {Sound} from "../lib/Globals";
 
 	onMount ( async () => {
 		if (!get(stores.__audioEngine)) {

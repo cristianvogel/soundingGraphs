@@ -8,9 +8,8 @@
     import {selectedGraphs} from "$lib/stores/selectedGraphsStore.js";
     import {from, op} from 'arquero';
     import {fade} from 'svelte/transition'
-    import {TRIM} from "$lib/Globals.js";
+    import {TEXT_CHAR_LIMIT} from "$lib/Globals.ts";
     import Icon from "@iconify/svelte";
-    const rainbow = import( '../../../static/graphics/svg/rainbowWave.svg' )
     function storeValid(s) {
         typeof (s) === 'undefined'
     }
@@ -45,7 +44,7 @@
                              style="overflow-wrap: anywhere;">{titleSR.curr}</div>
                     {/if}
                     <div class="level is-size-7 dropdown-item p-1 m-1">
-                        <div class="level-item is-justify-content-left">{label.slice(0, TRIM) + (label.length > TRIM ? '…' : '') }</div>
+                        <div class="level-item is-justify-content-left">{label.slice(0, TEXT_CHAR_LIMIT) + (label.length > TEXT_CHAR_LIMIT ? '…' : '') }</div>
                         <div class="level-item is-justify-content-right" style="color: {tints.at(i)}">
                             ◉
                         </div>

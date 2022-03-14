@@ -1,53 +1,60 @@
+/*
+    Main audio engine glue.
+    Initially have committed with Elementary.audio
+    but may try to build HTML5 or some other WASM engine
+    in the future
+
+    todo: fix master volume implementation
+ */
+
 import {get, Writable, writable} from "svelte/store";
-import {ElementaryWebAudioRenderer as core, el} from '@elemaudio/core-lite';
+import {el as elem, ElementaryWebAudioRenderer as core} from '@elemaudio/core-lite';
+import engineStateService from '../lib/stateMachinery/engineStateService.js'
+import {Sound} from "../lib/Globals";
 
 let masterVolumeNode;
 
-export enum Sound {
-    UNMOUNTED= 'UNMOUNTED',
-    MOUNTING = 'MOUNTING',
-    MOUNTED = 'MOUNTED',
-    PAUSED = 'PAUSED',
-    PLAYING = 'PLAYING',
-    ERROR = 'ERROR',
-    MAX_VOLUME = 0.8
-}
-
 abstract class AudioEngine {
     protected static ctx: AudioContext;
+    protected static getBaseAudioContext(): AudioContext { return this.ctx };
+    protected static setBaseAudioContext(ctx: AudioContext ) { this.ctx = ctx }
     protected static setState(s: string) { };
-    protected static state: Writable<string>;
+    protected static status: Writable<string>;
     protected static masterVolume: number;
-    static setMasterVolume(volume: number): void { } ;
+    abstract setMasterVolume(volume: number): void;
     abstract mount();
     abstract mute();
     abstract resume();
     abstract getState();
-    abstract getMainContext?(): AudioContext;
-    abstract ping?(): void;
+    abstract ping( ): void;
     abstract getMasterVolume?(): number;
 }
 
-class Elementary implements AudioEngine {
+class Elementary extends AudioEngine implements AudioEngine {
+
+    private readonly ctx: AudioContext;
+    status: Writable<string> = writable('')
+    masterVolume: number
+    private toggleCounter: number = 1;
 
     constructor(ctx: AudioContext) {
-        this.ctx = ctx;
+        super();
+        AudioEngine.setBaseAudioContext(ctx)
+        this.ctx = AudioEngine.getBaseAudioContext()
         this.setState(Sound.MOUNTING);
         this.masterVolume = 0.707;
     };
 
-    masterVolume: number;
-    state: Writable<string> = writable('');
-    ctx: AudioContext
-
     protected setState(newState: string) {
-        this.state.set(Sound[newState])
+        this.status.set(Sound[newState])
         return this.getState()
     };
 
-    setMasterVolume(volume) {
+    setMasterVolume(volume: number) {
         this.masterVolume = Math.max(0, Math.min(volume, Sound.MAX_VOLUME));
-        core.render(el.sm(volume,volume) )
+        core.render(
+            elem.sm(volume,volume)
+        )
     };
 
     async mount() {
@@ -72,7 +79,7 @@ class Elementary implements AudioEngine {
     };
 
     resume() {
-        this.state.update(() => {
+        this.status.update(() => {
                 let result;
                 if (this.ctx) {
                     this.ctx.resume().then(r => result = r)
@@ -85,18 +92,28 @@ class Elementary implements AudioEngine {
     };
 
     getMainContext() {
-        return this.ctx;
+        return AudioEngine.getBaseAudioContext();
     };
 
     getState() {
-        return get(this.state)
+        return get(this.status)
     };
 
-    async ping() {
+    async ping( reset: boolean = true ) {
         console.log('El: Ping')
         await this.resume()
         this.setMasterVolume(0.9)
-        core.render(el.mul(el.cycle(Date.now() % 16), el.cycle(128)));
+        const noteOff =  setTimeout( ()=> elem.const(0), 500) || elem.const(1)
+        let rm = elem.dcblock(elem.mul(
+            elem.cycle((Date.now() % 24) + 3),
+            elem.cycle(( 113 * 3)),
+            elem.adsr( 0.05, 2, 0, 2, noteOff)
+        ))
+        core.render(
+            elem.add(
+            elem.delay({size: 44100}, elem.ms2samps(123), 0.8, rm),
+                elem.delay({size: 44100}, elem.ms2samps(123 * 1.618), -0.8, rm)
+            ));
     };
 
     mute() {
@@ -108,6 +125,9 @@ class Elementary implements AudioEngine {
     getMasterVolume() {
         return this.masterVolume
     };
+
+    ms2samp( ms: number ) { elem.ms2samps(ms) }
 }
 
 export default Elementary
+

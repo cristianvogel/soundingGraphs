@@ -12,9 +12,6 @@ const config = {
 
 		adapter: adapter(),
 
-		// deprecated?
-		// hydrate the <div id="svelte"> element in src/app.html
-		// target: '#svelte',
 		vite: {
 			build: {
 					target: [ 'es2020' ]

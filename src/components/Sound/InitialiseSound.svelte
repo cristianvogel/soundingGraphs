@@ -1,28 +1,47 @@
 <script lang="ts">
-
-    import {get} from "svelte/store";
+    import {get, Writable} from "svelte/store";
     import stores from "../../lib/stores/Stores";
-    import AudioEngine, {Sound} from "../../script/audioEngine";
+    import type AudioEngine from "../../script/audioEngine";
+    import {Sound} from "../../lib/Globals";
+    import engineStateService from "../../lib/stateMachinery/engineStateService"
+    import type Machine from "robot3"
 
-    let soundStatus:boolean = false;
+    const engine: Writable<Machine> = engineStateService
+    $: send = $engine.send
+    $: currentEngineState = $engine.machine.current
+    $: soundingStatus = $engine.machine.current === Sound.PLAYING || false
 
-    function ping() {
-        const actx:AudioContext = get(stores.__actx)
-        const engine:AudioEngine = get(stores.__audioEngine)
-        if (actx && engine.getState()!==Sound.UNMOUNTED) {
-            engine.resume()
-            soundStatus = true;
-            engine.ping()
+    const wait = (f, ms) => setTimeout(f, ms);
+
+    function handleClick(e) {
+        if (currentEngineState === Sound.PAUSED) {
+            ping()
+        } else {
+            mute()
         }
     }
 
-    function mute(){
-        const engine:AudioEngine = get(stores.__audioEngine)
+      function ping() {
+         const actx: AudioContext = get(stores.__actx)
+         const engine: AudioEngine = get(stores.__audioEngine)
+         if (actx && engine.getState() !== Sound.UNMOUNTED) {
+             engine.resume()
+             engine.ping()
+             send({type: 'toggle', data: 'Ping'})
+              wait(mute, 3000)
+         }
+     }
+
+     function mute() {
+        const engine: AudioEngine = get(stores.__audioEngine)
         engine.mute()
+        send({type: 'toggle', data: 'Mute'})
     }
 
 </script>
-
-    <button class="button" on:click={ping}>Sound Check</button>
-    <button class={ soundStatus ? 'button' : 'button is-loading'} on:click={mute}>Stop Sound</button>
-
+{#if currentEngineState !== Sound.UNMOUNTED}
+    <button class={ 'button is-rounded is-small is-' + (soundingStatus ? 'danger' : 'light')}
+            on:click={ handleClick }
+    >Ping
+    </button>
+{/if}

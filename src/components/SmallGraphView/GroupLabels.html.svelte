@@ -8,7 +8,7 @@
 <script>
     import { getContext } from 'svelte';
     import { op } from 'arquero';
-    import { TRIM } from '$lib/Globals.js'
+    import { TEXT_CHAR_LIMIT } from '$lib/Globals.ts'
 
     const { data, x, y, xScale, yScale, xRange, yRange, z } = getContext('LayerCake');
 
@@ -19,7 +19,7 @@
 
     const labelColours = { bg: tints.bgDarker(normStep , 2), fg: tints.bgBrighter(normStep, 3 ) }
 
-    header = header.slice(0, TRIM) + ( header.length > TRIM ? '…' : '' )
+    header = header.slice(0, TEXT_CHAR_LIMIT) + ( header.length > TEXT_CHAR_LIMIT ? '…' : '' )
     /* --------------------------------------------
      * Title case the first letter
      */
