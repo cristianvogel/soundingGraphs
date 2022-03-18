@@ -3,15 +3,11 @@ import adapter from '@sveltejs/adapter-auto';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+	experimental: {
+		prebundleSvelteLibraries: true
+	},
 	kit: {
-		// adapter: adapter({
-		// 	// if true, will split your app into multiple functions
-		// 	// instead of creating a single one for the entire app
-		// 	split: false
-		// }),
-
 		adapter: adapter(),
-
 		vite: {
 			build: {
 					target: [ 'es2020' ]
