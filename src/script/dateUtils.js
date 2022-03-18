@@ -1,5 +1,4 @@
-
-import {isoParse, timeFormat, timeParse} from "d3-time-format";
+import { isoParse, timeFormat, timeParse } from "d3-time-format";
 
 /**
  *
@@ -15,17 +14,14 @@ import {isoParse, timeFormat, timeParse} from "d3-time-format";
  * full list https://github.com/d3/d3-time-format
  * @returns {*}
  */
-export function formatDate (dateString, returnFormat = "%B %d, %Y" ) {
-
-    const formatTime = timeFormat(returnFormat);
-    const formattedDate = formatTime(isoParse(timeParse(dateString)))
-    return formattedDate
+export function formatDate(dateString, returnFormat = "%B %d, %Y") {
+  const formatTime = timeFormat(returnFormat);
+  const formattedDate = formatTime(isoParse(timeParse(dateString)));
+  return formattedDate;
 }
 
-export function formatTime (timeString, returnFormat = "%H:%M" ) {
-
-    const formatTime = timeFormat(returnFormat);
-    const formattedDate = formatTime(isoParse(timeParse(timeString)))
-    return formattedDate
+export function formatTime(timeString, returnFormat = "%H:%M") {
+  const formatTime = timeFormat(returnFormat);
+  const formattedDate = formatTime(isoParse(timeParse(timeString)));
+  return formattedDate;
 }
-

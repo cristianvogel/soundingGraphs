@@ -21,7 +21,7 @@
 </script>
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-        <a class="navbar-item" href="https://sonify.io">
+        <a class="navbar-item" href="">
 <!--            <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
             <Hint text='Show all the graphs you have selected' >
                     <GraphBasket/>

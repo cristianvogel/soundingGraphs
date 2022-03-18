@@ -12,7 +12,7 @@
 			const actx: AudioContext = new (window["AudioContext"])()
 			stores.__actx.set(actx)
 			console.log('Single audio context running at: '+ get(stores.__actx).sampleRate + ' SR ')
-			stores.__audioEngine.set(new Elementary(actx))
+			stores.__audioEngine.set( Elementary.getInstanceOfElementary(actx))
 			const engine: Elementary = get(stores.__audioEngine)
 			const engineState: string = engine.getState()
 			if (engineState === (Sound.MOUNTING || Sound.UNMOUNTED)) await engine.mount()

@@ -1,4 +1,3 @@
-//
 //   example integration with https://thisrobot.life
 // supports send, context, and machine (to include machine.current & machine.state)
 
@@ -27,7 +26,8 @@ const machinery:Machine = createMachine({
         transition('toggle', Sound.PAUSED,
             guard( (ctx, event:Event)=> event.data  === 'Mute' )
         )
-        )}, context);
+        )},
+  context);
 
 const engineStateService = robot.useMachine(machinery, event);
 export default engineStateService;
