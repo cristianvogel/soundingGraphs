@@ -30,7 +30,6 @@
             fullExtents = calcExtents( flatten(pointSeries), extentGetters)
         }
     )
-    // $: selected = false;
 
     function handleSmallGraphClicked ( e ) {
         const { label, colour, tableTitle} = e.detail

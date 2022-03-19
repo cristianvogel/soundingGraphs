@@ -1,5 +1,5 @@
 <script>
-    import MultipleGraphsView from "./MultipleGraphsView.svelte";
+    import MultipleGraphsView from "./SmallMultiples.svelte";
 </script>
 
 <div class="box">

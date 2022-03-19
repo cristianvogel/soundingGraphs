@@ -6,16 +6,17 @@
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
     import {get, Writable} from "svelte/store";
-    import stores from "../../lib/stores/Stores";
-    import AudioEngine from "../../script/audioEngine";
+    import { audioEngine, audioStore } from "../../lib/stores/Stores";
     import {Sound} from "../../lib/Globals";
     import engineStateService from "../../lib/stateMachinery/engineStateService"
     import type Machine from "robot3"
 
-    const engine: Writable<Machine> = engineStateService
-    $: send = $engine.send
-    $: currentEngineState = $engine.machine.current
-    $: soundingStatus = $engine.machine.current === Sound.PLAYING || false
+    // todo: D.R.Y ( duplicate lines from InitialiseSound.svelte )
+    const engineState: Writable<Machine> = engineStateService
+    $: send = $engineState.send
+    $: currentEngineState = $engineState.machine.current
+    $: soundingStatus = $engineState.machine.current === Sound.PLAYING || false
+   const engine = get(audioEngine)
 
     export let data = {}
     export let page = {};
@@ -25,18 +26,14 @@
     const numberRows = rowCount(data);
 
     function handleSonifyClick() {
-        ping()
-    }
-    function ping() {
-        const actx: AudioContext = get(stores.__actx)
-        const engine: AudioEngine = get(stores.__audioEngine)
-        if (actx && engine.getState() !== Sound.UNMOUNTED) {
-            engine.resume()
-            engine.ping()
-            send({type: 'toggle', data: 'SonifyButton'})
-        }
+        testPing()  // temporary
     }
 
+    function testPing() {
+        engine.resume()
+        engine.ping()
+        send({type: 'toggle', data: 'SonifyButton'})
+    }
 
 </script>
 

@@ -14,7 +14,7 @@
         typeof (s) === 'undefined'
     }
 
-    $: rt = from($selectedGraphs)
+    $: rt = from($selectedGraphs) //create arquero table from...
     $: labels = storeValid(rt) ? rt.orderby('tableTitle').array('label') : rt.array('label')
     $: tints = storeValid(rt) ? rt.orderby('colour') : rt.array('colour')
     $: tableTitles = rt.array('tableTitle')

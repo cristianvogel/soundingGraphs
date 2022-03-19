@@ -5,8 +5,7 @@
     import InteractiveInfoBox from './InteractiveInfoBox.html.svelte';
     import Labels from './GroupLabels.html.svelte';
     import Line from './Line.svelte';
-    import {getContext} from "svelte";
-    import {get} from "svelte/store";
+    import { ColourMapping } from "$lib/graphics/colourMapping.ts";
 
     export let data;
     export let fullExtents;
@@ -16,8 +15,7 @@
     export let step;
     export let tableTitle;
 
-    const colours = getContext('colour.mapping')()
-    let tints = get(colours)
+    const tints = new ColourMapping()
     let highlight = false;
 
     function handleSmallGraphClicked( e ) {

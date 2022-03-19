@@ -11,7 +11,7 @@ export enum Sound {
     MOUNTED = 'MOUNTED',
     PAUSED = 'PAUSED',
     PLAYING = 'PLAYING',
-    ERROR = 'ERROR',
+    SUSPENDED = 'SUSPENDED',
     MAX_VOLUME = 0.8
 }
 

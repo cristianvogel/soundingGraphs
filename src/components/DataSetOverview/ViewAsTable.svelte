@@ -3,12 +3,12 @@
     import { rowCount, normalizeText} from "$lib/DataUtils.js";
     import TableBody from "./TableBody.svelte";
     import DataSetFooter from "./DataSetFooter.svelte";
-    import  stores  from '$lib/stores/Stores.ts'
+    import { tableViewState }  from '$lib/stores/Stores.ts'
     import { get } from 'svelte/store'
-    import {getContext, setContext} from "svelte";
+    import {setContext} from "svelte";
 
-    const colours = getContext('colour.mapping')()
-    let tints = get(colours)
+    import { ColourMapping } from "$lib/graphics/colourMapping.ts";
+    const tints = new ColourMapping()
     const tint = ( n ) => tints.bgDarker( n )
 
     export let data = {}
@@ -16,7 +16,7 @@
     const size = Object.keys(data).length || 1;
 
     const numberRows = rowCount(data);
-    const visible = stores.__tableViewState();
+    const visible = tableViewState();
 
 
     let offset = 0, step = 10, direction = 1

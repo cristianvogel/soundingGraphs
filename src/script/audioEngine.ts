@@ -1,10 +1,12 @@
 /*
-    Main audio engine glue.
+    Main audio engineStateMachine glue.
+    Bit of a mess.
     Initially have committed with Elementary.audio
-    but may try to build HTML5 or some other WASM engine
+    but may try to build HTML5 or some other WASM engineStateMachine
     in the future
 
     todo: fix master volume implementation
+    todo: actually use the engine state machine
  */
 
 import { get, Writable, writable } from "svelte/store";
@@ -12,8 +14,8 @@ import {
   el as elem,
   ElementaryWebAudioRenderer as core,
 } from "@elemaudio/core-lite";
-import engineStateService from "../lib/stateMachinery/engineStateService.js";
 import { Sound } from "../lib/Globals";
+import { audioStore } from "../lib/stores/Stores";
 
 let masterVolumeNode;
 
@@ -72,7 +74,7 @@ class Elementary extends AudioEngine  {
     if (!this.actx) return false;
 
     masterVolumeNode = this.actx.createGain();
-    masterVolumeNode.gain.value = 0.9;
+    masterVolumeNode.gain.value = this.masterVolume;
     masterVolumeNode.connect(this.actx.destination);
 
     const elementaryNode = await core.initialize(this.actx, {
@@ -84,7 +86,8 @@ class Elementary extends AudioEngine  {
     core.on("load", (event) => {
       console.log("🔉 Elementary Audio ready -> " + Object.keys(event));
       this.setState(Sound.MOUNTED);
-      console.log("connecting node graph...\t");
+      audioStore.update(store => ({ ...store, elementaryReady: true }))
+      console.log("connecting node graph to destination... max channel count: \t" + this.actx.destination.maxChannelCount);
       elementaryNode.connect(masterVolumeNode);
     });
   }
@@ -96,7 +99,7 @@ class Elementary extends AudioEngine  {
         this.actx.resume().then((r) => (result = r));
         return Sound[result ? "PLAYING" : "PAUSED"];
       } else {
-        return Sound.ERROR;
+        return Sound.SUSPENDED;
       }
     });
   }
