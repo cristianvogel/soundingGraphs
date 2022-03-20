@@ -14,9 +14,9 @@
 
     export let header = '';
     export let highlight =  false;
-    export let tints = { }
     export let normStep = 0;
 
+    const tints = getContext('colour.mapping')
     const labelColours = { bg: tints.bgDarker(normStep , 2), fg: tints.bgBrighter(normStep, 3 ) }
 
     header = header.slice(0, TEXT_CHAR_LIMIT) + ( header.length > TEXT_CHAR_LIMIT ? '…' : '' )

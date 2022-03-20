@@ -5,10 +5,9 @@
     import DataSetFooter from "./DataSetFooter.svelte";
     import { tableViewState }  from '$lib/stores/Stores.ts'
     import { get } from 'svelte/store'
-    import {setContext} from "svelte";
+    import { getContext, setContext } from "svelte";
 
-    import { ColourMapping } from "$lib/graphics/colourMapping.ts";
-    const tints = new ColourMapping()
+    const tints = getContext('colour.mapping')
     const tint = ( n ) => tints.bgDarker( n )
 
     export let data = {}

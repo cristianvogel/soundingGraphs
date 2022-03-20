@@ -8,7 +8,6 @@
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
 	import Elementary from "../script/audioEngine";
-	import {Sound} from "../lib/Globals";
 	import { ColourMapping } from "../lib/graphics/colourMapping";
 
 	const colourMapping = new ColourMapping();
@@ -21,8 +20,7 @@
 			console.log('Assigned audio context for: '+ context.sampleRate + ' SR ')
 			audioEngine.set( Elementary.getInstanceOfElementary(context))
 			const engine: Elementary = get(audioEngine)
-			const engineState: string = engine.getState()
-			if (engineState === (Sound.MOUNTING || Sound.UNMOUNTED)) await engine.mount()
+			await engine.mount()
 		}
 	})
 

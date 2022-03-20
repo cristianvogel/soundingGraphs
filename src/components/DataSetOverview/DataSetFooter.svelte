@@ -5,18 +5,17 @@
     import {rowCount} from "$lib/DataUtils.js";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
-    import {get, Writable} from "svelte/store";
-    import { audioEngine, audioStore } from "../../lib/stores/Stores";
+    import { audioEngine } from "../../lib/stores/Stores";
     import {Sound} from "../../lib/Globals";
-    import engineStateService from "../../lib/stateMachinery/engineStateService"
-    import type Machine from "robot3"
 
     // todo: D.R.Y ( duplicate lines from InitialiseSound.svelte )
-    const engineState: Writable<Machine> = engineStateService
-    $: send = $engineState.send
-    $: currentEngineState = $engineState.machine.current
-    $: soundingStatus = $engineState.machine.current === Sound.PLAYING || false
-   const engine = get(audioEngine)
+    import { send, machine } from "../../lib/stateMachinery/engineStateService";
+    import { get } from "svelte/store";
+
+    $: sendEvent = send
+    $: currentEngineState = machine.current
+    $: soundingStatus = machine.current === Sound.PLAYING || false
+    $: engine = get(audioEngine)
 
     export let data = {}
     export let page = {};

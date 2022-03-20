@@ -1,14 +1,11 @@
 <script lang="ts">
-    import {get, Writable} from "svelte/store";
-    import { audioEngine } from "../../lib/stores/Stores";
-    import {Sound} from "../../lib/Globals";
-    import engineStateService from "../../lib/stateMachinery/engineStateService"
-    import type Machine from "robot3"
+     import { audioEngine } from "../../lib/stores/Stores";
+     import {Sound} from "../../lib/Globals";
+     import { send, machine } from "../../lib/stateMachinery/engineStateService";
 
-    const engineState: Writable<Machine> = engineStateService
-    $: send = $engineState.send
-    $: currentEngineState = $engineState.machine.current
-    $: soundingStatus = $engineState.machine.current === Sound.PLAYING || false
+    $: sendEvent = send
+    $: currentEngineState = machine.current
+    $: soundingStatus = machine.current === Sound.PLAYING || false
     $: engine = audioEngine
 
     const wait = (f, ms) => setTimeout(f, ms);
@@ -22,15 +19,15 @@
     }
 
       function pingTest() {
-         $engine.resume()
-         $engine.ping()
-         send({type: 'toggle', data: 'Ping'})
-         wait(mute, 3000)
+          $engine.resume()
+          $engine.ping()
+          sendEvent({type: 'toggle', data: 'Ping'})
+          wait(mute, 3000)
      }
 
      function mute() {
-        $engine.mute()
-        send({type: 'toggle', data: 'Mute'})
+         $engine.mute()
+         send({type: 'toggle', data: 'Mute'})
     }
 
 </script>

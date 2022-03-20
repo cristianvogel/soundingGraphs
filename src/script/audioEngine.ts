@@ -1,55 +1,107 @@
 /*
     Main audio engineStateMachine glue.
-    Bit of a mess.
-    Initially have committed with Elementary.audio
-    but may try to build HTML5 or some other WASM engineStateMachine
-    in the future
+    Move Elementary.core render to a Service
 
     todo: fix master volume implementation
-    todo: actually use the engine state machine
+    todo: actually use the engine state machine here
  */
 
-import { get, Writable, writable } from "svelte/store";
+import { get } from "svelte/store";
 import {
   el as elem,
   ElementaryWebAudioRenderer as core,
 } from "@elemaudio/core-lite";
 import { Sound } from "../lib/Globals";
 import { audioStore } from "../lib/stores/Stores";
+import { store, send, machine } from "../lib/stateMachinery/engineStateService";
 
 let masterVolumeNode;
+const fsm = { store: store, send: send, machine: machine }
+
+interface AudioContextInfo {
+  context: AudioContext,
+  status: AudioContextState
+}
 
 abstract class AudioEngine {
+  /**
+   * @private there should only be one live AudioContext
+   * and it needs to be kept open for the engine
+   * to function in the app
+   */
   private static ctx: AudioContext;
+
+  /**
+   *
+   * @param ctx the live audio context
+   * @protected Singleton constructor pattern
+   */
   protected constructor(ctx: AudioContext) {
     AudioEngine.ctx = ctx
   }
-  protected static getBaseAudioContext(): AudioContext {
-    return AudioEngine.ctx;
+
+  /**
+   * @protected Returns main audio context and operating information about it
+   */
+  protected getBaseAudioContext(): AudioContextInfo {
+    return  { context: AudioEngine.ctx, status: AudioEngine.ctx.state } ;
   }
-  protected static setState(s: string) {}
-  protected static status: Writable<string>;
-  protected static masterVolume: number;
-  protected static getInstanceOfElementary( baseACTX: AudioContext) {};
-  abstract setMasterVolume(volume: number);
+
+  /**
+   * @param state
+   * @protected a method to switch base audio context state
+   */
+  protected  setAudioContextState(state:AudioContextState) {
+     switch (state) {
+       case "closed": AudioEngine.ctx.close()
+         break
+       case "suspended": AudioEngine.ctx.suspend()
+         break
+       case "running": AudioEngine.ctx.resume()
+     }
+
+  }
+
+  /**
+   *
+   * @param baseACTX Main audio context
+   * @protected Singleton instantiation of Elementary audio engine
+   *
+   */
+  protected static getInstanceOfElementary( baseACTX: AudioContext) { return };
+
+  /**
+   * main audio engine validation, mounting and initialisation
+   */
   abstract mount();
+
+  /**
+   *  mute the audio graph without closing context
+   */
   abstract mute();
-  abstract resume();
-  abstract getState();
+
+  /**
+   * resume the main context , user interaction
+   * is needed always before browser will play any audio.
+   * Attach resume() to a UI button, to prompt user interaction
+   */
+  protected resume() { this.setAudioContextState('running') };
+
+  abstract getEngineState();
   abstract ping();
-  abstract getMasterVolume?(): number;
+  protected static masterVolume: number;
+  abstract setMasterVolume(volume: number);
 }
 
 class Elementary extends AudioEngine  {
   private static instance: Elementary;
-  status: Writable<string> = writable("");
   masterVolume: number;
   private actx: AudioContext;
 
   private constructor(baseACTX: AudioContext) {
+    if (!baseACTX) throw new Error('Base AudioContext does not exist!')
     super(baseACTX);
-    this.actx = AudioEngine.getBaseAudioContext();
-    this.setState(Sound.MOUNTING);
+    this.actx = super.getBaseAudioContext().context;
     this.masterVolume = 0.707;
   }
 
@@ -60,9 +112,8 @@ class Elementary extends AudioEngine  {
     return Elementary.instance;
   }
 
-  protected setState(newState: string) {
-    this.status.set(Sound[newState]);
-    return this.getState();
+  protected setEngineState(newState: Sound) {
+    fsm.send( {type: newState.toString(), data: 'statusChange'})
   }
 
   setMasterVolume(volume: number) {
@@ -76,6 +127,7 @@ class Elementary extends AudioEngine  {
     masterVolumeNode = this.actx.createGain();
     masterVolumeNode.gain.value = this.masterVolume;
     masterVolumeNode.connect(this.actx.destination);
+    super.setAudioContextState('suspended')
 
     const elementaryNode = await core.initialize(this.actx, {
       numberOfInputs: 0,
@@ -83,9 +135,10 @@ class Elementary extends AudioEngine  {
       outputChannelCount: [2],
     });
 
+
     core.on("load", (event) => {
       console.log("🔉 Elementary Audio ready -> " + Object.keys(event));
-      this.setState(Sound.MOUNTED);
+      this.setEngineState(Sound.MOUNTED);
       audioStore.update(store => ({ ...store, elementaryReady: true }))
       console.log("connecting node graph to destination... max channel count: \t" + this.actx.destination.maxChannelCount);
       elementaryNode.connect(masterVolumeNode);
@@ -93,23 +146,20 @@ class Elementary extends AudioEngine  {
   }
 
   resume() {
-    this.status.update(() => {
-      let result;
-      if (this.actx) {
-        this.actx.resume().then((r) => (result = r));
-        return Sound[result ? "PLAYING" : "PAUSED"];
-      } else {
-        return Sound.SUSPENDED;
-      }
-    });
+    super.resume()
+    audioStore.update(store => ({ ...store, contextState: 'running'  }))
   }
 
   getMainContext() {
-    return AudioEngine.getBaseAudioContext();
+    return super.getBaseAudioContext().context;
   }
 
-  getState() {
-    return get(this.status);
+  getMainContextStatus() {
+    return super.getBaseAudioContext().status;
+  }
+
+  getEngineState() {
+    return fsm.machine.current
   }
 
   async ping(reset: boolean = true) {
@@ -134,17 +184,10 @@ class Elementary extends AudioEngine  {
 
   mute() {
     console.log("El: Mute");
-    this.setState(Sound.PAUSED);
+    this.setEngineState(Sound.PAUSED);
     this.setMasterVolume(0);
   }
 
-  getMasterVolume() {
-    return this.masterVolume;
-  }
-
-  ms2samp(ms: number) {
-    elem.ms2samps(ms);
-  }
 }
 
 export default Elementary;

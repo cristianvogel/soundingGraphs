@@ -5,7 +5,7 @@
     import InteractiveInfoBox from './InteractiveInfoBox.html.svelte';
     import Labels from './GroupLabels.html.svelte';
     import Line from './Line.svelte';
-    import { ColourMapping } from "$lib/graphics/colourMapping.ts";
+    import { getContext } from "svelte";
 
     export let data;
     export let fullExtents;
@@ -15,7 +15,7 @@
     export let step;
     export let tableTitle;
 
-    const tints = new ColourMapping()
+    const tints = getContext('colour.mapping')
     let highlight = false;
 
     function handleSmallGraphClicked( e ) {
@@ -35,9 +35,9 @@
         yDomain ={fullExtents}
         pointerEvents = true
 >
-    <Labels {header} {tints} {highlight} {normStep}  />
+    <Labels {header} {highlight} {normStep}  />
     <ScaledSvg viewBox='0 0 100 100'>
-         <Line stroke={ tints[highlight ? 'bgDarker' : 'bg']( normStep )} {highlight }/>
+         <Line stroke={ tints[highlight ? 'bgDarker' : 'bg']( normStep )} {highlight}/>
     </ScaledSvg>
 
     <Html>
@@ -47,7 +47,6 @@
             {tableTitle}
             tint = {tints.bg(normStep)}
             on:smallGraph.clicked={handleSmallGraphClicked}
-            on:smallGraph.clicked
     />
     </Html>
 </LayerCake>

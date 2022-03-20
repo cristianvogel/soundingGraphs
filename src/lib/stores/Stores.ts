@@ -12,8 +12,6 @@ export const tableViewState: () => Writable<boolean> = function () {return writa
 
 //audio
 export const audioEngine: Writable<Elementary> = writable()
-
 export const audioStore: Writable<AudioStore> = writable(
   { context: null, contextState: 'suspended', elementaryReady: false }
 )
-

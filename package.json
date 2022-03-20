@@ -49,7 +49,6 @@
 		"layercake": "^6.1.0",
 		"marked": "^4.0.12",
 		"robot3": "^0.2.21",
-		"svelte-hint": "^1.0.0-rc.2",
-		"svelte-robot-factory": "^2.0.4"
+		"svelte-hint": "^1.0.0-rc.2"
 	}
 }
