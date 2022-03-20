@@ -7,7 +7,7 @@
 	} from "$lib/stores/Stores";
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
-	import Elementary from "../script/audioEngine";
+	import Elementary from "../script/Audio/audioEngine";
 	import { ColourMapping } from "../lib/graphics/colourMapping";
 
 	const colourMapping = new ColourMapping();

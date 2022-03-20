@@ -1,11 +1,11 @@
-
 /// FSM machine in a Store based on code by @mui
 
-import {Sound} from "../Globals";
+import { Sound } from "../Globals";
 import { createMachineStore } from "../stores/fsmStore";
-import { createMachine, guard, state, transition } from 'robot3';
+import { createMachine, guard, state, transition } from "robot3";
+
 type Event = {
-    data: string
+  data: string
 }
 
 export function createAudioEngineStateMachine() {// initial data?
@@ -17,7 +17,7 @@ export function createAudioEngineStateMachine() {// initial data?
 
     [Sound.PAUSED]: state(
       transition("toggle", Sound.PLAYING,
-        guard((ctx, event: Event) => event.data === "Ping")
+        guard((ctx, event: Event) => event.data !== "Mute")
       )
     ),
     [Sound.PLAYING]: state(
@@ -33,3 +33,7 @@ export function createAudioEngineStateMachine() {// initial data?
 
 const { store, send, machine } = createAudioEngineStateMachine();
 export { store, send, machine };
+
+
+//  EXAMPLE: read event.data and use as guard
+//  guard((ctx, event: Event) => event.data === "Mute")

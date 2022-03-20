@@ -1,5 +1,6 @@
 /* Variables and mixins declared here will be available in all other SCSS files */ /* https://github.com/jgthms/bulma/issues/1293 */
 $body-overflow-y: auto;
+
 // Set your brand colors
 $bright-green: #22be14;
 $cyan: #32c1b5;
@@ -35,3 +36,5 @@ $dropdown-menu-min-width: 18rem;
 // Navbar
 $navbar-breakpoint: 500px;
 $navbar-background-color: hsla(0,0%,90%, 90%);
+// Vumeters
+$vumeter-timing: 2.35s;

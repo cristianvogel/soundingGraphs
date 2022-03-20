@@ -5,13 +5,17 @@
      * Built on Bulma NavBar generic template with additional
      * tooltips provided by Svelte-Hint package
      */
-
     import Icon from '@iconify/svelte';
     import Hint from "svelte-hint";
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
     import InitialiseSound from "./Sound/InitialiseSound.svelte";
-    import {Sound} from "../lib/Globals";
+    import { Sound } from "../lib/Globals";
+    import { store } from "../lib/stateMachinery/engineStateService";
+    import AudioIcon from "./GraphicalExtras/AudioIcon.svelte";
+
+    $: engineState = $store.state;
+
     let soundPlaying: boolean;
 
     function audioEngineStatusChange( event ) {
@@ -78,6 +82,11 @@
             <div class="navbar-item">
                 <InitialiseSound on:sound.status={audioEngineStatusChange}/>
             </div>
+            {#if engineState===Sound.PLAYING }
+                <div class="navbar-item">
+                <AudioIcon/>
+                </div>
+            {/if}
         </div>
         <div class="navbar-end">
 

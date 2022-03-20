@@ -3,7 +3,6 @@
     Move Elementary.core render to a Service
 
     todo: fix master volume implementation
-    todo: actually use the engine state machine here
  */
 
 import { get } from "svelte/store";
@@ -11,9 +10,9 @@ import {
   el as elem,
   ElementaryWebAudioRenderer as core,
 } from "@elemaudio/core-lite";
-import { Sound } from "../lib/Globals";
-import { audioStore } from "../lib/stores/Stores";
-import { store, send, machine } from "../lib/stateMachinery/engineStateService";
+import { Sound } from "../../lib/Globals";
+import { audioStore } from "../../lib/stores/Stores";
+import { store, send, machine } from "../../lib/stateMachinery/engineStateService";
 
 let masterVolumeNode;
 const fsm = { store: store, send: send, machine: machine }

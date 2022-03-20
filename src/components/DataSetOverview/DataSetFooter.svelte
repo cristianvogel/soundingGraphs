@@ -9,13 +9,14 @@
     import {Sound} from "../../lib/Globals";
 
     // todo: D.R.Y ( duplicate lines from InitialiseSound.svelte )
-    import { send, machine } from "../../lib/stateMachinery/engineStateService";
-    import { get } from "svelte/store";
+    import { send, store } from "../../lib/stateMachinery/engineStateService";
 
-    $: sendEvent = send
-    $: currentEngineState = machine.current
-    $: soundingStatus = machine.current === Sound.PLAYING || false
-    $: engine = get(audioEngine)
+    const timer = { set: (f, ms) => setTimeout(f, ms), clear: () => clearTimeout() }
+    let currentTimer
+
+    $: currentEngineState = $store.state;
+    $: soundingStatus = currentEngineState === Sound.PLAYING || false;
+    $: engine = audioEngine;
 
     export let data = {}
     export let page = {};
@@ -23,15 +24,23 @@
     const {toggleView, visible} = getContext('table.status')
     const {inc, dec} = getContext('table.jump')
     const numberRows = rowCount(data);
+    const wait = (f, ms) => setTimeout(f, ms);
 
     function handleSonifyClick() {
         testPing()  // temporary
     }
 
     function testPing() {
-        engine.resume()
-        engine.ping()
+        $engine.resume()
+        $engine.ping()
         send({type: 'toggle', data: 'SonifyButton'})
+        if(currentTimer) timer.clear()
+        currentTimer = timer.set(mute, 3000)
+    }
+
+    function mute() {
+        $engine.mute();
+        send({ type: "toggle", data: "Mute" });
     }
 
 </script>
@@ -76,12 +85,14 @@
             {/if}
         </div>
         <div class="navbar-end p-2">
+            {#if currentEngineState !== Sound.UNMOUNTED}
             <Hint>
                 <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover "
                 on:click={handleSonifyClick}>Sonify
                 </button>
                 <i slot="hint" class={globStyle.toolTip}>Sonify data set</i>
             </Hint>
+            {/if}
         </div>
     </div>
 </div>

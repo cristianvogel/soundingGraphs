@@ -1,40 +1,42 @@
 <script lang="ts">
-     import { audioEngine } from "../../lib/stores/Stores";
-     import {Sound} from "../../lib/Globals";
-     import { send, machine } from "../../lib/stateMachinery/engineStateService";
+  import { audioEngine } from "../../lib/stores/Stores";
+  import { Sound } from "../../lib/Globals";
+  import { send, store } from "../../lib/stateMachinery/engineStateService";
+  import Speaker from "../GraphicalExtras/Speaker.svelte";
 
-    $: sendEvent = send
-    $: currentEngineState = machine.current
-    $: soundingStatus = machine.current === Sound.PLAYING || false
-    $: engine = audioEngine
+  $: currentEngineState = $store.state;
+  $: soundingStatus = currentEngineState === Sound.PLAYING || false;
+  $: engine = audioEngine;
 
-    const wait = (f, ms) => setTimeout(f, ms);
+  const timer = { set: (f, ms) => setTimeout(f, ms), clear: () => clearTimeout() }
+  let currentTimer;
 
-    function handleClick(e) {
-        if (currentEngineState === Sound.PAUSED) {
-            pingTest()
-        } else {
-            mute()
-        }
+  function handleClick(e) {
+    if (currentEngineState === Sound.PAUSED) {
+      pingTest();
+    } else {
+      mute();
     }
+  }
 
-      function pingTest() {
-          $engine.resume()
-          $engine.ping()
-          sendEvent({type: 'toggle', data: 'Ping'})
-          wait(mute, 3000)
-     }
+  function pingTest() {
+    $engine.resume();
+    $engine.ping();
+    send({ type: "toggle", data: "Ping" })
+    if(currentTimer) timer.clear()
+    currentTimer = timer.set(mute, 3000)
+  }
 
-     function mute() {
-         $engine.mute()
-         send({type: 'toggle', data: 'Mute'})
-    }
+  function mute() {
+    $engine.mute();
+    send({ type: "toggle", data: "Mute" })
+  }
 
 </script>
 
 {#if currentEngineState !== Sound.UNMOUNTED}
-    <button class={ 'button is-rounded is-small is-' + (soundingStatus ? 'danger' : 'light')}
-            on:click={ handleClick }
-    >Ping
-    </button>
+  <button class={ 'button is-rounded is-small is-' + (soundingStatus ? 'danger' : 'light')}
+          on:click={ handleClick }
+  ><Speaker/>
+  </button>
 {/if}
