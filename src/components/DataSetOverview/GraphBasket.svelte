@@ -24,7 +24,7 @@
 <div class="dropdown is-hoverable">
     <div class="dropdown-trigger">
         <button class="button has-icons-left" style="background-color: transparent;" aria-haspopup="true" aria-label="Basket with selected graphs" aria-controls="dropdown-menu7">
-                 <Icon class="m-2 is-size-4" icon="mdi-progress-check" style="color: {tints.at(-1)}"/> Basket {labels.length}
+                 <Icon class="m-2 is-size-5" icon="mdi-progress-check" style="color: {tints.at(-1)}"/> Basket
         </button>
     </div>
     {#if $selectedGraphs.length > 0}

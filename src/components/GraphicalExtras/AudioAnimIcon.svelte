@@ -3,16 +3,15 @@
 // borrowed from https://codepen.io/joshbader/pen/LpvWZx
 </script>
 
-<div class="bars audio"><i></i><i></i></div>
+<div class="bars audio"><i></i></div>
 
 <style lang="scss">
     .bars {
         position: relative;
         top: 0%;
         left: 0%;
-        width: 1.5em;
         height: 90%;
-      transform: scaleX(50%);
+      transform: scaleX(40%);
     }
 
     .audio { color: $primary; }
@@ -28,7 +27,7 @@
         display: flex;
         width: 0.5em;
         height: 0.5em;
-        transform: translateY(-50%) scaleY(50%);
+        transform: translate( 15%, -50%) scaleY(50%);
         background-image: linear-gradient(45deg,#910AE3,#6B1DF6,#4739FE,#285BFB,#1181ED,#03A6D5);
     }
 

@@ -14,6 +14,7 @@
     import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
 
+
     $: engineState = $store.state;
 
     let soundPlaying: boolean;
@@ -24,10 +25,15 @@
 
 </script>
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
+    <div class="navbar-brand" style="flex-basis: fit-content; flex-flow: column; width: 12.5%;">
         <a class="navbar-item" href="">
 <!--        <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
             <SoundingGraphs/>
+            {#if engineState===Sound.PLAYING }
+                <AudioAnimIcon/>
+            {:else }
+
+            {/if}
         </a>
 
         <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
@@ -46,12 +52,12 @@
             </Hint>
             <Hint text='Home' >
                 <a class="navbar-item " href="/" media="screen" aria-label="home">
-                    <Icon icon="mdi-light:home" class="m-2 is-size-4" /> Home
+                    <Icon icon="mdi-light:home" class="m-2 is-size-5" /> Home
                 </a>
             </Hint>
             <Hint text='Recent Projects' >
                 <a class="navbar-item" href="/recentProjects" media="screen" aria-label="recent projects">
-                    <Icon icon="mdi-card-text"  class="m-2 is-size-4"/> Recent
+                    <Icon icon="mdi-card-text"  class="m-2 is-size-5"/> Recent
                 </a>
             </Hint>
             <Hint text="Documentation">
@@ -59,13 +65,13 @@
                 <Icon icon="mdi-book-open-outline" class="m-2 is-size-5" /> Docs
             </a>
             </Hint>
+
             <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link" aria-label="More">
+                <a class="navbar-link" style="padding-top: 2px" aria-label="More" media="screen">
                     <Icon icon="mdi-looks" class="m-2 is-size-5"/> More
                 </a>
                 <div class="navbar-dropdown">
-                    <Hint text="an interactive tutorial" placement="right" middleware = "[
-                          offset(100)">
+                    <Hint text="an interactive tutorial" placement="right" >
                         <a class="navbar-item" href="/more.sonificationTutorial" aria-label="tutorial">
                             Data as Raw Material
                         </a>
@@ -82,27 +88,25 @@
                     </a>
                 </div>
             </div>
-            <div class="navbar-item">
-                <InitialiseSound on:sound.status={audioEngineStatusChange}/>
-            </div>
-            {#if engineState===Sound.PLAYING }
-                <div class="navbar-item">
-                <AudioAnimIcon/>
-                </div>
-            {/if}
+
         </div>
+
         <div class="navbar-end">
 
             <div class="navbar-item">
-                <div class="buttons">
-                    <a class="button is-primary">
-                        <strong>Sign up</strong>
-                    </a>
-                    <a class="button is-light">
-                        Log in
-                    </a>
-                </div>
+                <InitialiseSound on:sound.status={audioEngineStatusChange}/>
             </div>
+
+<!--            <div class="navbar-item">-->
+<!--                <div class="buttons">-->
+<!--                    <a class="button is-primary">-->
+<!--                        <strong>Sign up</strong>-->
+<!--                    </a>-->
+<!--                    <a class="button is-light">-->
+<!--                        Log in-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
     </div>
 </nav>
