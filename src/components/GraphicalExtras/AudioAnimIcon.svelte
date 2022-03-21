@@ -1,6 +1,6 @@
 <script>
 // Animated Audio Icon
-// borrowed from https://codepen.io/joshbader/pen/LpvWZx
+// adapted from https://codepen.io/joshbader/pen/LpvWZx
 </script>
 
 <div class="bars audio"><i></i></div>
@@ -11,7 +11,7 @@
         top: 0%;
         left: 0%;
         height: 90%;
-      transform: scaleX(40%);
+        transform: scaleX(40%) scaleY(40%);;
     }
 
     .audio { color: $primary; }
@@ -25,9 +25,9 @@
         top: 50%;
         left: 100%;
         display: flex;
-        width: 0.5em;
+        width: 0.6em;
         height: 0.5em;
-        transform: translate( 15%, -50%) scaleY(50%);
+        transform: translate( 20%, -50%) ;
         background-image: linear-gradient(45deg,#910AE3,#6B1DF6,#4739FE,#285BFB,#1181ED,#03A6D5);
     }
 

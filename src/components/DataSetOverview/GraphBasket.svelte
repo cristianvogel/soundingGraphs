@@ -57,3 +57,11 @@
         </div>
     {/if}
 </div>
+
+<style>
+
+
+    .dropdown-menu {
+        transform: translateX(-10em);
+    }
+</style>

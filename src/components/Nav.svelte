@@ -14,7 +14,7 @@
     import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
-
+    import { selectedGraphs } from "../lib/stores/graphsViewStores";
 
     $: engineState = $store.state;
 
@@ -89,11 +89,18 @@
         </div>
 
         <div class="navbar-end">
+            {#if $selectedGraphs.length<1}
             <Hint text='Show all the graphs you have selected' placement='left-end' >
                 <div class="navbar-item">
                     <GraphBasket/>
                 </div>
             </Hint>
+            {:else }
+                <div class="navbar-item">
+                    <GraphBasket/>
+                </div>
+            {/if}
+            <VerticalDots/>
             <div class="navbar-item">
                 <InitialiseSound on:sound.status={audioEngineStatusChange}/>
             </div>
