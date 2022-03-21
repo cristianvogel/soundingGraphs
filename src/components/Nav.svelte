@@ -13,6 +13,7 @@
     import { store } from "../lib/stateMachinery/engineStateService";
     import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
+    import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
 
 
     $: engineState = $store.state;
@@ -45,11 +46,7 @@
 
     <div id="navbarBasic" class="navbar-menu">
         <div class="navbar-start">
-            <Hint text='Show all the graphs you have selected' placement='left-end' >
-                <div class="navbar-item">
-                    <GraphBasket/>
-                </div>
-            </Hint>
+            <VerticalDots/>
             <Hint text='Home' >
                 <a class="navbar-item " href="/" media="screen" aria-label="home">
                     <Icon icon="mdi-light:home" class="m-2 is-size-5" /> Home
@@ -92,7 +89,11 @@
         </div>
 
         <div class="navbar-end">
-
+            <Hint text='Show all the graphs you have selected' placement='left-end' >
+                <div class="navbar-item">
+                    <GraphBasket/>
+                </div>
+            </Hint>
             <div class="navbar-item">
                 <InitialiseSound on:sound.status={audioEngineStatusChange}/>
             </div>
