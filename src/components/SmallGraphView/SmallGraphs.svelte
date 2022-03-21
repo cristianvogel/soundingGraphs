@@ -5,7 +5,7 @@
     import {onMount} from "svelte";
     import {from, op} from 'arquero';
     import {calcExtents, flatten} from "layercake";
-    import { selectedGraphs } from "$lib/stores/selectedGraphsStore.js";
+    import { selectedGraphs } from "$lib/stores/graphsViewStores.ts";
 
     export let data = {};  // dataset shaped as columns with keys: headers values: column-data
     export let source = 'unknown'
@@ -38,10 +38,10 @@
 
         if (prop) {
             $selectedGraphs = [...selectedGraphs.prune( entry )]
-            console.log('remove from basket: '+ entry)
+            console.log('remove from basket: '+ entry.label)
         } else {
             $selectedGraphs = [ ...$selectedGraphs, entry ]
-            console.log('add to basket' + entry)
+            console.log('add to basket' + entry.label)
         }
     }
 

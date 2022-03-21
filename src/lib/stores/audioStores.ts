@@ -7,9 +7,6 @@ type AudioStore = {
   elementaryReady: boolean
 }
 
-//display
-export const tableViewState: () => Writable<boolean> = function () {return writable(true)}
-
 //audio
 export const audioEngine: Writable<Elementary> = writable()
 export const audioStore: Writable<AudioStore> = writable(

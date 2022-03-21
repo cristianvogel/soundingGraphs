@@ -4,7 +4,7 @@
 	import {
 		audioEngine,
 		audioStore
-	} from "$lib/stores/Stores";
+	} from "../lib/stores/audioStores";
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
 	import Elementary from "../script/Audio/audioEngine";

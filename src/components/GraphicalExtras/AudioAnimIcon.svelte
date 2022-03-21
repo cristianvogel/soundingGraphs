@@ -3,19 +3,17 @@
 // borrowed from https://codepen.io/joshbader/pen/LpvWZx
 </script>
 
-<div class="icon audio"><i></i><i></i></div>
+<div class="bars audio"><i></i><i></i></div>
 
 <style lang="scss">
     .bars {
         position: relative;
-        top: 50%;
-        left: 50%;
-        width: 16em;
-        height: 16em;
-        transform: translate(50%,-50%);
+        top: 0%;
+        left: 0%;
+        width: 1.5em;
+        height: 90%;
+      transform: scaleX(50%);
     }
-
-    /* Audio */
 
     .audio { color: $primary; }
 
@@ -27,12 +25,11 @@
         position: absolute;
         top: 50%;
         left: 100%;
-        display: block;
-        width: 0.25em;
+        display: flex;
+        width: 0.5em;
         height: 0.5em;
-        transform: translate(-50%,-50%);
-        background: currentColor;
-        border-radius: 0.125em;
+        transform: translateY(-50%) scaleY(50%);
+        background-image: linear-gradient(45deg,#910AE3,#6B1DF6,#4739FE,#285BFB,#1181ED,#03A6D5);
     }
 
     .audio::after { animation: audio4 $vumeter-timing infinite; }

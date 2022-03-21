@@ -5,16 +5,17 @@
     // the Parent table of each 'Orphaned' child
     // todo: improve layout when there's a lot of selection, modal maybe?
 
-    import {selectedGraphs} from "$lib/stores/selectedGraphsStore.js";
+    import {selectedGraphs} from "$lib/stores/graphsViewStores.ts";
     import {from, op} from 'arquero';
     import {fade} from 'svelte/transition'
     import {TEXT_CHAR_LIMIT} from "$lib/Globals.ts";
     import Icon from "@iconify/svelte";
+
     function storeValid(s) {
         typeof (s) === 'undefined'
     }
 
-    $: rt = from($selectedGraphs) //create arquero table from...
+    $: rt = from($selectedGraphs) // create arquero table from...
     $: labels = storeValid(rt) ? rt.orderby('tableTitle').array('label') : rt.array('label')
     $: tints = storeValid(rt) ? rt.orderby('colour') : rt.array('colour')
     $: tableTitles = rt.array('tableTitle')
@@ -22,8 +23,8 @@
 </script>
 <div class="dropdown is-hoverable">
     <div class="dropdown-trigger">
-        <button class="button has-icons-right" style="background-color: transparent;" aria-haspopup="true" aria-controls="dropdown-menu7">
-           <span class="rainbow-text has-text-weight-bold is-size-4">SOUNDING GRAPHS</span> <i class="ml-2 mt-2 is-size-4"><Icon icon="mdi-progress-check" /></i>
+        <button class="button has-icons-left" style="background-color: transparent;" aria-haspopup="true" aria-label="Basket with selected graphs" aria-controls="dropdown-menu7">
+                 <Icon class="m-2 is-size-4" icon="mdi-progress-check" style="color: {tints.at(-1)}"/> Basket {labels.length}
         </button>
     </div>
     {#if $selectedGraphs.length > 0}
@@ -33,7 +34,8 @@
                     {@const titleSR = {
                         "curr": tableTitles.at(Math.max(0, i)),
                         "prev": tableTitles.at(Math.max(0, i - 1))
-                    }}<!-- a naive-but-works shift register approach to figure out the parent tables -->
+                    }}
+                    <!-- a naive-but-works shift register approach to figure out the parent tables -->
                     {#if (i === 0 || !op.equal(titleSR.prev, titleSR.curr)) }
 
                         <div id={titleSR} class="subtitle is-size-7 dropdown-item
@@ -55,14 +57,3 @@
         </div>
     {/if}
 </div>
-
-<style>
-
-    .rainbow-text {
-        background-image: linear-gradient(90deg,#80ed12,#A5D604,#C7B601,#E39209,#F66C1C,#FE4838,#FB295B,#ED1180,#D504A6,#B601C8,#910AE3,#6B1DF6,#4739FE,#285BFB,#1181ED,#03A6D5);
-        color: #0000;
-        -webkit-background-clip: text;
-        background-clip: text;
-    }
-
-</style>

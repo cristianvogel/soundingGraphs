@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { audioEngine } from "../../lib/stores/Stores";
+  import { audioEngine } from "../../lib/stores/audioStores";
   import { Sound } from "../../lib/Globals";
   import { send, store } from "../../lib/stateMachinery/engineStateService";
   import Speaker from "../GraphicalExtras/Speaker.svelte";

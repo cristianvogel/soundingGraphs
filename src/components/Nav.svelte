@@ -8,11 +8,11 @@
     import Icon from '@iconify/svelte';
     import Hint from "svelte-hint";
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
-    import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
     import InitialiseSound from "./Sound/InitialiseSound.svelte";
     import { Sound } from "../lib/Globals";
     import { store } from "../lib/stateMachinery/engineStateService";
-    import AudioIcon from "./GraphicalExtras/AudioIcon.svelte";
+    import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
+    import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
 
     $: engineState = $store.state;
 
@@ -26,10 +26,8 @@
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
         <a class="navbar-item" href="">
-<!--            <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
-            <Hint text='Show all the graphs you have selected' >
-                    <GraphBasket/>
-            </Hint>
+<!--        <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
+            <SoundingGraphs/>
         </a>
 
         <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
@@ -38,9 +36,14 @@
             <span aria-hidden="true"></span>
         </a>
     </div>
-    <VerticalDots/>
+
     <div id="navbarBasic" class="navbar-menu">
         <div class="navbar-start">
+            <Hint text='Show all the graphs you have selected' placement='left-end' >
+                <div class="navbar-item">
+                    <GraphBasket/>
+                </div>
+            </Hint>
             <Hint text='Home' >
                 <a class="navbar-item " href="/" media="screen" aria-label="home">
                     <Icon icon="mdi-light:home" class="m-2 is-size-4" /> Home
@@ -84,7 +87,7 @@
             </div>
             {#if engineState===Sound.PLAYING }
                 <div class="navbar-item">
-                <AudioIcon/>
+                <AudioAnimIcon/>
                 </div>
             {/if}
         </div>

@@ -5,7 +5,7 @@
     import {rowCount} from "$lib/DataUtils.js";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
-    import { audioEngine } from "../../lib/stores/Stores";
+    import { audioEngine } from "../../lib/stores/audioStores";
     import {Sound} from "../../lib/Globals";
 
     // todo: D.R.Y ( duplicate lines from InitialiseSound.svelte )

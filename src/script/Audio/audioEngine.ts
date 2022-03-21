@@ -11,7 +11,7 @@ import {
   ElementaryWebAudioRenderer as core,
 } from "@elemaudio/core-lite";
 import { Sound } from "../../lib/Globals";
-import { audioStore } from "../../lib/stores/Stores";
+import { audioStore } from "../../lib/stores/audioStores";
 import { store, send, machine } from "../../lib/stateMachinery/engineStateService";
 
 let masterVolumeNode;

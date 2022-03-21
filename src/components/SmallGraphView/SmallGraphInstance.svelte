@@ -47,6 +47,7 @@
             {tableTitle}
             tint = {tints.bg(normStep)}
             on:smallGraph.clicked={handleSmallGraphClicked}
+            on:smallGraph.clicked 
     />
     </Html>
 </LayerCake>

@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
     import { slide , fly } from 'svelte/transition';
     import { rowCount, normalizeText} from "$lib/DataUtils.js";
     import TableBody from "./TableBody.svelte";
     import DataSetFooter from "./DataSetFooter.svelte";
-    import { tableViewState }  from '$lib/stores/Stores.ts'
     import { get } from 'svelte/store'
     import { getContext, setContext } from "svelte";
+    import { tableViewState } from "$lib/stores/graphsViewStores";
 
     const tints = getContext('colour.mapping')
     const tint = ( n ) => tints.bgDarker( n )
@@ -16,7 +16,6 @@
 
     const numberRows = rowCount(data);
     const visible = tableViewState();
-
 
     let offset = 0, step = 10, direction = 1
 
