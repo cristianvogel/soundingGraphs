@@ -159,7 +159,7 @@ class Elementary extends AudioEngine  {
       outputChannelCount: [2],
       processorOptions: {
         virtualFileSystem: {
-          "/static/waves/ShortSharpPoly.wav": await(super.asSamplesFile('./static/waves/ShortSharpPoly.wav'))
+          "/static/waves/ShortSharpPoly.wav": await(super.asSamplesFile('waves/ShortSharpPoly.wav'))
             .then(( wt ) => wt.channelData)
         }
       }
