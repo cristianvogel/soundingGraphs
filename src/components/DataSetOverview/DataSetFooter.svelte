@@ -2,7 +2,7 @@
     import Hint from "svelte-hint";
     import {globStyle} from '../../assets/styleDefs.js'
     import {fade} from 'svelte/transition';
-    import {rowCount} from "../../lib/common/dataUtils.js";
+    import {rowCount} from "$lib/common/dataUtils.ts";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
     import { audioEngine, audioStore } from "../../lib/stores/audioStores";

@@ -62,6 +62,7 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
 
 export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" : [] })) {
     const arqueroTable =  table(dataColumns)
+    // @ts-ignore
     const tableWithIndex = arqueroTable.assign({ rowNumber: arqueroTable.indices() })
     let options = {}
     let xy = []
@@ -76,7 +77,6 @@ export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" :
     let result = []
     xy.forEach(t => result.push(t.objects()))
     // seems to always return one blank entry...
-
     return result.slice(0,-1)
 }
 
@@ -90,4 +90,9 @@ export function prune( arr, el ) {
         if (op.equal(_el, el)) arr.splice(_idx, 1)
     })
     return arr
+}
+
+export function clamp( value: number, min: number, max: number)
+{
+    return Math.max( min, Math.min( value, max))
 }

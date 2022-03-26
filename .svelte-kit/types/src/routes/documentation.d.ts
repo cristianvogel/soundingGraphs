@@ -1,3 +1,7 @@
 // this file is auto-generated
 import type { Load as GenericLoad } from '@sveltejs/kit';
-export type Load<Props = Record<string, any>> = GenericLoad<{}, Props>;
+
+export type Load<
+	InputProps extends Record<string, any> = Record<string, any>,
+	OutputProps extends Record<string, any> = InputProps
+> = GenericLoad<{}, InputProps, OutputProps>;

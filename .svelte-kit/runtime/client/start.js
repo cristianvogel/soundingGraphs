@@ -2,7 +2,7 @@ import { onMount, tick } from 'svelte';
 import { writable } from 'svelte/store';
 import { assets, set_paths } from '../paths.js';
 import Root from '__GENERATED__/root.svelte';
-import { routes, fallback } from '__GENERATED__/manifest.js';
+import { components, dictionary, matchers } from '__GENERATED__/client-manifest.js';
 import { init } from './singletons.js';
 
 /**
@@ -250,8 +250,143 @@ function initial_fetch(resource, opts) {
 	return fetch(resource, opts);
 }
 
+const param_pattern = /^(\.\.\.)?(\w+)(?:=(\w+))?$/;
+
+/** @param {string} id */
+function parse_route_id(id) {
+	/** @type {string[]} */
+	const names = [];
+
+	/** @type {string[]} */
+	const types = [];
+
+	// `/foo` should get an optional trailing slash, `/foo.json` should not
+	// const add_trailing_slash = !/\.[a-z]+$/.test(key);
+	let add_trailing_slash = true;
+
+	const pattern =
+		id === ''
+			? /^\/$/
+			: new RegExp(
+					`^${decodeURIComponent(id)
+						.split('/')
+						.map((segment, i, segments) => {
+							// special case — /[...rest]/ could contain zero segments
+							const match = /^\[\.\.\.(\w+)(?:=(\w+))?\]$/.exec(segment);
+							if (match) {
+								names.push(match[1]);
+								types.push(match[2]);
+								return '(?:/(.*))?';
+							}
+
+							const is_last = i === segments.length - 1;
+
+							return (
+								'/' +
+								segment
+									.split(/\[(.+?)\]/)
+									.map((content, i) => {
+										if (i % 2) {
+											const [, rest, name, type] = /** @type {RegExpMatchArray} */ (
+												param_pattern.exec(content)
+											);
+											names.push(name);
+											types.push(type);
+											return rest ? '(.*?)' : '([^/]+?)';
+										}
+
+										if (is_last && content.includes('.')) add_trailing_slash = false;
+
+										return (
+											content // allow users to specify characters on the file system in an encoded manner
+												.normalize()
+												// We use [ and ] to denote parameters, so users must encode these on the file
+												// system to match against them. We don't decode all characters since others
+												// can already be epressed and so that '%' can be easily used directly in filenames
+												.replace(/%5[Bb]/g, '[')
+												.replace(/%5[Dd]/g, ']')
+												// '#', '/', and '?' can only appear in URL path segments in an encoded manner.
+												// They will not be touched by decodeURI so need to be encoded here, so
+												// that we can match against them.
+												// We skip '/' since you can't create a file with it on any OS
+												.replace(/#/g, '%23')
+												.replace(/\?/g, '%3F')
+												// escape characters that have special meaning in regex
+												.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+										); // TODO handle encoding
+									})
+									.join('')
+							);
+						})
+						.join('')}${add_trailing_slash ? '/?' : ''}$`
+			  );
+
+	return { pattern, names, types };
+}
+
+/**
+ * @param {RegExpMatchArray} match
+ * @param {string[]} names
+ * @param {string[]} types
+ * @param {Record<string, import('types').ParamMatcher>} matchers
+ */
+function exec(match, names, types, matchers) {
+	/** @type {Record<string, string>} */
+	const params = {};
+
+	for (let i = 0; i < names.length; i += 1) {
+		const name = names[i];
+		const type = types[i];
+		const value = match[i + 1] || '';
+
+		if (type) {
+			const matcher = matchers[type];
+			if (!matcher) throw new Error(`Missing "${type}" param matcher`); // TODO do this ahead of time?
+
+			if (!matcher(value)) return;
+		}
+
+		params[name] = value;
+	}
+
+	return params;
+}
+
+/**
+ * @param {import('types').CSRComponentLoader[]} components
+ * @param {Record<string, [number[], number[], 1?]>} dictionary
+ * @param {Record<string, (param: string) => boolean>} matchers
+ * @returns {import('types').CSRRoute[]}
+ */
+function parse(components, dictionary, matchers) {
+	const routes = Object.entries(dictionary).map(([id, [a, b, has_shadow]]) => {
+		const { pattern, names, types } = parse_route_id(id);
+
+		return {
+			id,
+			/** @param {string} path */
+			exec: (path) => {
+				const match = pattern.exec(path);
+				if (match) return exec(match, names, types, matchers);
+			},
+			a: a.map((n) => components[n]),
+			b: b.map((n) => components[n]),
+			has_shadow: !!has_shadow
+		};
+	});
+
+	return routes;
+}
+
 const SCROLL_KEY = 'sveltekit:scroll';
 const INDEX_KEY = 'sveltekit:index';
+
+const routes = parse(components, dictionary, matchers);
+
+// we import the root layout/error components eagerly, so that
+// connectivity errors after initialisation don't nuke the app
+const default_layout = components[0]();
+const default_error = components[1]();
 
 // We track the scroll position associated with each history entry in sessionStorage,
 // rather than on history.state itself, because when navigation is driven by
@@ -339,8 +474,7 @@ function create_client({ target, session, base, trailing_slash }) {
 		if (!ready) return;
 		session_id += 1;
 
-		const intent = get_navigation_intent(new URL(location.href));
-		update(intent, [], true);
+		update(new URL(location.href), [], true);
 	});
 	ready = true;
 
@@ -405,29 +539,35 @@ function create_client({ target, session, base, trailing_slash }) {
 
 	/** @param {URL} url */
 	async function prefetch(url) {
-		if (!owns(url)) {
+		const intent = get_navigation_intent(url);
+
+		if (!intent) {
 			throw new Error('Attempted to prefetch a URL that does not belong to this app');
 		}
 
-		const intent = get_navigation_intent(url);
-
-		load_cache.promise = get_navigation_result(intent, false);
+		load_cache.promise = load_route(intent, false);
 		load_cache.id = intent.id;
 
 		return load_cache.promise;
 	}
 
 	/**
-	 * @param {import('./types').NavigationIntent} intent
+	 * @param {URL} url
 	 * @param {string[]} redirect_chain
 	 * @param {boolean} no_cache
 	 * @param {{hash?: string, scroll: { x: number, y: number } | null, keepfocus: boolean, details: { replaceState: boolean, state: any } | null}} [opts]
 	 */
-	async function update(intent, redirect_chain, no_cache, opts) {
-		const current_token = (token = {});
-		let navigation_result = await get_navigation_result(intent, no_cache);
+	async function update(url, redirect_chain, no_cache, opts) {
+		const intent = get_navigation_intent(url);
 
-		if (!navigation_result && intent.url.pathname === location.pathname) {
+		const current_token = (token = {});
+		let navigation_result = intent && (await load_route(intent, no_cache));
+
+		if (
+			!navigation_result &&
+			url.origin === location.origin &&
+			url.pathname === location.pathname
+		) {
 			// this could happen in SPA fallback mode if the user navigated to
 			// `/non-existent-page`. if we fall back to reloading the page, it
 			// will create an infinite loop. so whereas we normally handle
@@ -435,13 +575,14 @@ function create_client({ target, session, base, trailing_slash }) {
 			// we render a client-side error page instead
 			navigation_result = await load_root_error_page({
 				status: 404,
-				error: new Error(`Not found: ${intent.url.pathname}`),
-				url: intent.url
+				error: new Error(`Not found: ${url.pathname}`),
+				url,
+				routeId: null
 			});
 		}
 
 		if (!navigation_result) {
-			await native_navigation(intent.url);
+			await native_navigation(url);
 			return; // unnecessary, but TypeScript prefers it this way
 		}
 
@@ -451,17 +592,18 @@ function create_client({ target, session, base, trailing_slash }) {
 		invalidated.clear();
 
 		if (navigation_result.redirect) {
-			if (redirect_chain.length > 10 || redirect_chain.includes(intent.url.pathname)) {
+			if (redirect_chain.length > 10 || redirect_chain.includes(url.pathname)) {
 				navigation_result = await load_root_error_page({
 					status: 500,
 					error: new Error('Redirect loop'),
-					url: intent.url
+					url,
+					routeId: null
 				});
 			} else {
 				if (router_enabled) {
-					goto(new URL(navigation_result.redirect, intent.url).href, {}, [
+					goto(new URL(navigation_result.redirect, url).href, {}, [
 						...redirect_chain,
-						intent.url.pathname
+						url.pathname
 					]);
 				} else {
 					await native_navigation(new URL(navigation_result.redirect, location.href));
@@ -472,7 +614,7 @@ function create_client({ target, session, base, trailing_slash }) {
 		} else if (navigation_result.props?.page?.status >= 400) {
 			const updated = await stores.updated.check();
 			if (updated) {
-				await native_navigation(intent.url);
+				await native_navigation(url);
 			}
 		}
 
@@ -482,7 +624,7 @@ function create_client({ target, session, base, trailing_slash }) {
 			const { details } = opts;
 			const change = details.replaceState ? 0 : 1;
 			details.state[INDEX_KEY] = current_history_index += change;
-			history[details.replaceState ? 'replaceState' : 'pushState'](details.state, '', intent.url);
+			history[details.replaceState ? 'replaceState' : 'pushState'](details.state, '', url);
 		}
 
 		if (started) {
@@ -522,7 +664,7 @@ function create_client({ target, session, base, trailing_slash }) {
 			await tick();
 
 			if (autoscroll) {
-				const deep_linked = intent.url.hash && document.getElementById(intent.url.hash.slice(1));
+				const deep_linked = url.hash && document.getElementById(url.hash.slice(1));
 				if (scroll) {
 					scrollTo(scroll.x, scroll.y);
 				} else if (deep_linked) {
@@ -576,36 +718,6 @@ function create_client({ target, session, base, trailing_slash }) {
 	}
 
 	/**
-	 * @param {import('./types').NavigationIntent} intent
-	 * @param {boolean} no_cache
-	 */
-	async function get_navigation_result(intent, no_cache) {
-		if (load_cache.id === intent.id && load_cache.promise) {
-			return load_cache.promise;
-		}
-
-		for (let i = 0; i < intent.routes.length; i += 1) {
-			const route = intent.routes[i];
-
-			// load code for subsequent routes immediately, if they are as
-			// likely to match the current path/query as the current one
-			let j = i + 1;
-			while (j < intent.routes.length) {
-				const next = intent.routes[j];
-				if (next[0].toString() === route[0].toString()) {
-					next[1].forEach((loader) => loader());
-					j += 1;
-				} else {
-					break;
-				}
-			}
-
-			const result = await load_route(route, intent, no_cache);
-			if (result) return result;
-		}
-	}
-
-	/**
 	 *
 	 * @param {{
 	 *   url: URL;
@@ -614,9 +726,18 @@ function create_client({ target, session, base, trailing_slash }) {
 	 *   branch: Array<import('./types').BranchNode | undefined>;
 	 *   status: number;
 	 *   error?: Error;
+	 *   routeId: string | null;
 	 * }} opts
 	 */
-	async function get_navigation_result_from_branch({ url, params, stuff, branch, status, error }) {
+	async function get_navigation_result_from_branch({
+		url,
+		params,
+		stuff,
+		branch,
+		status,
+		error,
+		routeId
+	}) {
 		const filtered = /** @type {import('./types').BranchNode[] } */ (branch.filter(Boolean));
 		const redirect = filtered.find((f) => f.loaded?.redirect);
 
@@ -640,7 +761,7 @@ function create_client({ target, session, base, trailing_slash }) {
 		}
 
 		if (!current.url || url.href !== current.url.href) {
-			result.props.page = { url, params, status, error, stuff };
+			result.props.page = { error, params, routeId, status, stuff, url };
 
 			// TODO remove this for 1.0
 			/**
@@ -699,9 +820,10 @@ function create_client({ target, session, base, trailing_slash }) {
 	 *   params: Record<string, string>;
 	 *   stuff: Record<string, any>;
 	 *   props?: Record<string, any>;
+	 *   routeId: string | null;
 	 * }} options
 	 */
-	async function load_node({ status, error, module, url, params, stuff, props }) {
+	async function load_node({ status, error, module, url, params, stuff, props, routeId }) {
 		/** @type {import('./types').BranchNode} */
 		const node = {
 			module,
@@ -738,6 +860,7 @@ function create_client({ target, session, base, trailing_slash }) {
 		if (module.load) {
 			/** @type {import('types').LoadInput | import('types').ErrorLoadInput} */
 			const load_input = {
+				routeId,
 				params: uses_params,
 				props: props || {},
 				get url() {
@@ -791,21 +914,20 @@ function create_client({ target, session, base, trailing_slash }) {
 	}
 
 	/**
-	 * @param {import('types').CSRRoute} route
 	 * @param {import('./types').NavigationIntent} intent
 	 * @param {boolean} no_cache
 	 */
-	async function load_route(route, { id, url, path }, no_cache) {
+	async function load_route({ id, url, params, route }, no_cache) {
+		if (load_cache.id === id && load_cache.promise) {
+			return load_cache.promise;
+		}
+
 		if (!no_cache) {
 			const cached = cache.get(id);
 			if (cached) return cached;
 		}
 
-		const [pattern, a, b, get_params, shadow_key] = route;
-		const params = get_params
-			? // the pattern is for the route which we've already matched to this path
-			  get_params(/** @type {RegExpExecArray}  */ (pattern.exec(path)))
-			: {};
+		const { a, b, has_shadow } = route;
 
 		const changed = current.url && {
 			url: id !== current.url.pathname + current.url.search,
@@ -852,22 +974,17 @@ function create_client({ target, session, base, trailing_slash }) {
 					/** @type {Record<string, any>} */
 					let props = {};
 
-					const is_shadow_page = shadow_key !== undefined && i === a.length - 1;
+					const is_shadow_page = has_shadow && i === a.length - 1;
 
 					if (is_shadow_page) {
 						const res = await fetch(
 							`${url.pathname}${url.pathname.endsWith('/') ? '' : '/'}__data.json${url.search}`,
 							{
 								headers: {
-									'x-sveltekit-load': /** @type {string} */ (shadow_key)
+									'x-sveltekit-load': 'true'
 								}
 							}
 						);
-
-						if (res.status === 204) {
-							// fallthrough
-							return;
-						}
 
 						if (res.ok) {
 							const redirect = res.headers.get('x-sveltekit-location');
@@ -880,7 +997,7 @@ function create_client({ target, session, base, trailing_slash }) {
 								};
 							}
 
-							props = await res.json();
+							props = res.status === 204 ? {} : await res.json();
 						} else {
 							status = res.status;
 							error = new Error('Failed to load data');
@@ -893,7 +1010,8 @@ function create_client({ target, session, base, trailing_slash }) {
 							url,
 							params,
 							props,
-							stuff
+							stuff,
+							routeId: route.id
 						});
 					}
 
@@ -903,9 +1021,14 @@ function create_client({ target, session, base, trailing_slash }) {
 						}
 
 						if (node.loaded) {
+							// TODO remove for 1.0
+							// @ts-expect-error
 							if (node.loaded.fallthrough) {
-								return;
+								throw new Error(
+									'fallthrough is no longer supported. Use matchers instead: https://kit.svelte.dev/docs/routing#advanced-routing-matching'
+								);
 							}
+
 							if (node.loaded.error) {
 								status = node.loaded.status;
 								error = node.loaded.error;
@@ -951,7 +1074,8 @@ function create_client({ target, session, base, trailing_slash }) {
 								module: await b[i](),
 								url,
 								params,
-								stuff: node_loaded.stuff
+								stuff: node_loaded.stuff,
+								routeId: route.id
 							});
 
 							if (error_loaded?.loaded?.error) {
@@ -976,7 +1100,8 @@ function create_client({ target, session, base, trailing_slash }) {
 				return await load_root_error_page({
 					status,
 					error,
-					url
+					url,
+					routeId: route.id
 				});
 			} else {
 				if (node?.loaded?.stuff) {
@@ -996,7 +1121,8 @@ function create_client({ target, session, base, trailing_slash }) {
 			stuff,
 			branch,
 			status,
-			error
+			error,
+			routeId: route.id
 		});
 	}
 
@@ -1005,26 +1131,29 @@ function create_client({ target, session, base, trailing_slash }) {
 	 *   status: number;
 	 *   error: Error;
 	 *   url: URL;
+	 *   routeId: string | null
 	 * }} opts
 	 */
-	async function load_root_error_page({ status, error, url }) {
+	async function load_root_error_page({ status, error, url, routeId }) {
 		/** @type {Record<string, string>} */
 		const params = {}; // error page does not have params
 
 		const root_layout = await load_node({
-			module: await fallback[0],
+			module: await default_layout,
 			url,
 			params,
-			stuff: {}
+			stuff: {},
+			routeId
 		});
 
 		const root_error = await load_node({
 			status,
 			error,
-			module: await fallback[1],
+			module: await default_error,
 			url,
 			params,
-			stuff: (root_layout && root_layout.loaded && root_layout.loaded.stuff) || {}
+			stuff: (root_layout && root_layout.loaded && root_layout.loaded.stuff) || {},
+			routeId
 		});
 
 		return await get_navigation_result_from_branch({
@@ -1036,28 +1165,32 @@ function create_client({ target, session, base, trailing_slash }) {
 			},
 			branch: [root_layout, root_error],
 			status,
-			error
+			error,
+			routeId
 		});
 	}
 
 	/** @param {URL} url */
-	function owns(url) {
-		return url.origin === location.origin && url.pathname.startsWith(base);
-	}
-
-	/** @param {URL} url */
 	function get_navigation_intent(url) {
+		if (url.origin !== location.origin || !url.pathname.startsWith(base)) return;
+
 		const path = decodeURI(url.pathname.slice(base.length) || '/');
 
-		/** @type {import('./types').NavigationIntent} */
-		const intent = {
-			id: url.pathname + url.search,
-			routes: routes.filter(([pattern]) => pattern.test(path)),
-			url,
-			path
-		};
+		for (const route of routes) {
+			const params = route.exec(path);
 
-		return intent;
+			if (params) {
+				/** @type {import('./types').NavigationIntent} */
+				const intent = {
+					id: url.pathname + url.search,
+					route,
+					params,
+					url
+				};
+
+				return intent;
+			}
+		}
 	}
 
 	/**
@@ -1091,14 +1224,8 @@ function create_client({ target, session, base, trailing_slash }) {
 			return;
 		}
 
-		if (!owns(url)) {
-			await native_navigation(url);
-		}
-
 		const pathname = normalize_path(url.pathname, trailing_slash);
-		url = new URL(url.origin + pathname + url.search + url.hash);
-
-		const intent = get_navigation_intent(url);
+		const normalized = new URL(url.origin + pathname + url.search + url.hash);
 
 		update_scroll_positions(current_history_index);
 
@@ -1111,11 +1238,11 @@ function create_client({ target, session, base, trailing_slash }) {
 		if (started) {
 			stores.navigating.set({
 				from: current.url,
-				to: intent.url
+				to: normalized
 			});
 		}
 
-		await update(intent, redirect_chain, false, {
+		await update(normalized, redirect_chain, false, {
 			scroll,
 			keepfocus,
 			details
@@ -1127,7 +1254,7 @@ function create_client({ target, session, base, trailing_slash }) {
 		if (navigating_token !== current_navigating_token) return;
 
 		if (!navigating) {
-			const navigation = { from, to: url };
+			const navigation = { from, to: normalized };
 			callbacks.after_navigate.forEach((fn) => fn(navigation));
 
 			stores.navigating.set(null);
@@ -1187,8 +1314,7 @@ function create_client({ target, session, base, trailing_slash }) {
 
 			if (!invalidating) {
 				invalidating = Promise.resolve().then(async () => {
-					const intent = get_navigation_intent(new URL(location.href));
-					await update(intent, [], true);
+					await update(new URL(location.href), [], true);
 
 					invalidating = null;
 				});
@@ -1205,10 +1331,10 @@ function create_client({ target, session, base, trailing_slash }) {
 		// TODO rethink this API
 		prefetch_routes: async (pathnames) => {
 			const matching = pathnames
-				? routes.filter((route) => pathnames.some((pathname) => route[0].test(pathname)))
+				? routes.filter((route) => pathnames.some((pathname) => route.exec(pathname)))
 				: routes;
 
-			const promises = matching.map((r) => Promise.all(r[1].map((load) => load())));
+			const promises = matching.map((r) => Promise.all(r.a.map((load) => load())));
 
 			await Promise.all(promises);
 		},
@@ -1386,7 +1512,7 @@ function create_client({ target, session, base, trailing_slash }) {
 			});
 		},
 
-		_hydrate: async ({ status, error, nodes, params }) => {
+		_hydrate: async ({ status, error, nodes, params, routeId }) => {
 			const url = new URL(location.href);
 
 			/** @type {Array<import('./types').BranchNode | undefined>} */
@@ -1420,7 +1546,8 @@ function create_client({ target, session, base, trailing_slash }) {
 						stuff,
 						status: is_leaf ? status : undefined,
 						error: is_leaf ? error : undefined,
-						props
+						props,
+						routeId
 					});
 
 					if (props) {
@@ -1436,7 +1563,8 @@ function create_client({ target, session, base, trailing_slash }) {
 							error_args = {
 								status: node.loaded.status,
 								error: node.loaded.error,
-								url
+								url,
+								routeId
 							};
 						} else if (node.loaded.stuff) {
 							stuff = {
@@ -1455,7 +1583,8 @@ function create_client({ target, session, base, trailing_slash }) {
 							stuff,
 							branch,
 							status,
-							error
+							error,
+							routeId
 					  });
 			} catch (e) {
 				if (error) throw e;
@@ -1463,7 +1592,8 @@ function create_client({ target, session, base, trailing_slash }) {
 				result = await load_root_error_page({
 					status: 500,
 					error: coalesce_to_error(e),
-					url
+					url,
+					routeId
 				});
 			}
 
@@ -1494,6 +1624,7 @@ function create_client({ target, session, base, trailing_slash }) {
  *     error: Error;
  *     nodes: Array<Promise<import('types').CSRComponent>>;
  *     params: Record<string, string>;
+ *     routeId: string | null;
  *   };
  * }} opts
  */

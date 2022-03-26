@@ -10,6 +10,7 @@
     import {fade} from 'svelte/transition'
     import {TEXT_CHAR_LIMIT} from "$lib/common/globals.ts";
     import Icon from "@iconify/svelte";
+    import { clamp } from "$lib/common/dataUtils";
 
     function storeValid(s) {
         typeof (s) === 'undefined'
@@ -24,7 +25,7 @@
 <div class="dropdown is-hoverable">
     <div class="dropdown-trigger">
         <button class="button has-icons-left" style="background-color: transparent;" aria-haspopup="true" aria-label="Basket with selected graphs" aria-controls="dropdown-menu7">
-                 <Icon class="m-2 is-size-5" icon="mdi-progress-check" style="color: {tints.at(-1)}"/> Basket
+                 <Icon class="m-2 is-size-5" icon="mdi-progress-check" style="color: {tints[tints.length-1]}"/> Basket
         </button>
     </div>
     {#if $selectedGraphs.length > 0}
@@ -32,8 +33,8 @@
             <div class="dropdown-content" transition:fade>
                 {#each labels as label, i}
                     {@const titleSR = {
-                        "curr": tableTitles.at(Math.max(0, i)),
-                        "prev": tableTitles.at(Math.max(0, i - 1))
+                        "curr": tableTitles[clamp( i , 0, tableTitles.length-1)],
+                        "prev": tableTitles[clamp( i-1, 0, tableTitles.length-1)]
                     }}
                     <!-- a naive-but-works shift register approach to figure out the parent tables -->
                     {#if (i === 0 || !op.equal(titleSR.prev, titleSR.curr)) }
@@ -47,7 +48,7 @@
                     {/if}
                     <div class="level is-size-7 dropdown-item p-1 m-1">
                         <div class="level-item is-justify-content-left">{label.slice(0, TEXT_CHAR_LIMIT) + (label.length > TEXT_CHAR_LIMIT ? '…' : '') }</div>
-                        <div class="level-item is-justify-content-right" style="color: {tints.at(i)}">
+                        <div class="level-item is-justify-content-right" style="color: {tints[i]}">
                             ◉
                         </div>
                     </div>

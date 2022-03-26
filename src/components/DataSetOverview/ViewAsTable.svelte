@@ -1,6 +1,6 @@
 <script lang="ts">
     import { slide , fly } from 'svelte/transition';
-    import { rowCount, normalizeText} from "../../lib/common/dataUtils.js";
+    import { rowCount, normalizeText} from "../../lib/common/dataUtils";
     import TableBody from "./TableBody.svelte";
     import DataSetFooter from "./DataSetFooter.svelte";
     import { get } from 'svelte/store'
