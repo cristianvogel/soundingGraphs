@@ -159,7 +159,7 @@ class Elementary extends AudioEngine  {
       outputChannelCount: [2],
       processorOptions: {
         virtualFileSystem: {
-          "/static/waves/ShortSharpPoly.wav": await(super.asSamplesFile('/static/waves/ShortSharpPoly.wav'))
+          "/static/waves/ShortSharpPoly.wav": await(super.asSamplesFile('./static/waves/ShortSharpPoly.wav'))
             .then(( wt ) => wt.channelData)
         }
       }
@@ -218,7 +218,7 @@ class Elementary extends AudioEngine  {
   env (onOff) {
     let onOffSignal = el.const({key: 'onOff', value: onOff});
     let table = this.controlWaves.sharp
-    let seqEnv = el.seq({seq: table, hold: true, loop: false}, el.train(250), onOffSignal);
+    let seqEnv = el.seq( {seq: table, hold: true, loop: false} , el.train(250), onOffSignal);
 
     return el.mul( el.sm( seqEnv ) )
   }
