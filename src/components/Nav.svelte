@@ -9,7 +9,7 @@
     import Hint from "svelte-hint";
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
     import InitialiseSound from "./Sound/InitialiseSound.svelte";
-    import { Sound } from "../lib/Globals";
+    import { Sound } from "../lib/common/globals";
     import { store } from "../lib/stateMachinery/engineStateService";
     import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
@@ -32,8 +32,6 @@
             <SoundingGraphs/>
             {#if engineState===Sound.PLAYING }
                 <AudioAnimIcon/>
-            {:else }
-
             {/if}
         </a>
 

@@ -1,5 +1,5 @@
 import {Writable, writable} from "svelte/store";
-import type Elementary from "../../script/Audio/audioEngine";
+import type Elementary from "../audio/audioEngine";
 
 type AudioStore = {
   context: AudioContext

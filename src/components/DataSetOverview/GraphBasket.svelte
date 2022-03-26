@@ -8,7 +8,7 @@
     import {selectedGraphs} from "$lib/stores/graphsViewStores.ts";
     import {from, op} from 'arquero';
     import {fade} from 'svelte/transition'
-    import {TEXT_CHAR_LIMIT} from "$lib/Globals.ts";
+    import {TEXT_CHAR_LIMIT} from "$lib/common/globals.ts";
     import Icon from "@iconify/svelte";
 
     function storeValid(s) {

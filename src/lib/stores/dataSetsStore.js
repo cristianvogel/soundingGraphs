@@ -2,7 +2,7 @@
 
 import { arrayStore } from "./arrayStore.js";
 import dataSetsIndex from "../../assets/dataSets/dataSetsIndex.js";
-import { headedColumnsFrom, transposeRowsToColumns} from "$lib/DataUtils";
+import { headedColumnsFrom, transposeRowsToColumns} from "$lib/common/dataUtils.js";
 
 const dataSetsStore = (initial) => {
     const store = arrayStore(initial);

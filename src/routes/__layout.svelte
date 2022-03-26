@@ -7,7 +7,7 @@
 	} from "../lib/stores/audioStores";
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
-	import Elementary from "../script/Audio/audioEngine";
+	import Elementary from "../lib/audio/audioEngine";
 	import { ColourMapping } from "../lib/graphics/colourMapping";
 
 	const colourMapping = new ColourMapping();
@@ -28,7 +28,7 @@
 
 </script>
 
-<Nav/>
+<Nav />
 
 <section class="container has-background-grey-light p-6">
 	<slot></slot>

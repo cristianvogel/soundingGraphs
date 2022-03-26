@@ -1,7 +1,7 @@
 
 <script>
     import SmallGraphInstance from './SmallGraphInstance.svelte';
-    import {mapDataToXYPoints, columnCount } from "$lib/DataUtils.js";
+    import {mapDataToXYPoints, columnCount } from "$lib/common/DataUtils";
     import {onMount} from "svelte";
     import {from, op} from 'arquero';
     import {calcExtents, flatten} from "layercake";
@@ -66,6 +66,7 @@
                         {step}
                         on:smallGraph.clicked={handleSmallGraphClicked}
                         {tableTitle}
+                        on:smallGraph.scrubbed
                 />
 
             </div>

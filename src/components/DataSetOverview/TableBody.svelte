@@ -2,7 +2,7 @@
 * Generates the table body for Table view
 */
 
-import { formatDate, formatTime } from "../../script/dateUtils.js";
+import { formatDate, formatTime } from "$lib/common/dateUtils.js";
 import { table } from "arquero";
 
 export let page = {};

@@ -1,22 +1,30 @@
-<script lang="ts">
+<script>
     import Hint from "svelte-hint";
     import {globStyle} from '../../assets/styleDefs.js'
     import {fade} from 'svelte/transition';
-    import {rowCount} from "$lib/DataUtils.js";
+    import {rowCount} from "../../lib/common/dataUtils.js";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
-    import { audioEngine } from "../../lib/stores/audioStores";
-    import {Sound} from "../../lib/Globals";
-
-    // todo: D.R.Y ( duplicate lines from InitialiseSound.svelte )
+    import { audioEngine, audioStore } from "../../lib/stores/audioStores";
     import { send, store } from "../../lib/stateMachinery/engineStateService";
-
-    const timer = { set: (f, ms) => setTimeout(f, ms), clear: () => clearTimeout() }
-    let currentTimer
+    import { FSM_STATE_ACTORS, Sound } from "../../lib/common/globals";
 
     $: currentEngineState = $store.state;
-    $: soundingStatus = currentEngineState === Sound.PLAYING || false;
+    $: sounding = (currentEngineState === Sound.PLAYING) || false;
     $: engine = audioEngine;
+
+    let currentTimer;
+
+    async function handleClick(e) {
+        console.log( `click state ${e.type} ${currentEngineState}`)
+        ping(e.type === "mousedown" ? 1 : 0);
+    }
+
+    function ping( onOff ) {
+        send({ type: 'play', data: FSM_STATE_ACTORS.SONIFY_BUTTON })
+        $engine.resume();
+        $engine.ping( onOff );
+    }
 
     export let data = {}
     export let page = {};
@@ -26,22 +34,10 @@
     const numberRows = rowCount(data);
     const wait = (f, ms) => setTimeout(f, ms);
 
-    function handleSonifyClick() {
-        testPing()  // temporary
+    function handleSonifyClick( e ) {
+        ping(e.type === "mousedown" ? 1 : 0);
     }
 
-    function testPing() {
-        $engine.resume()
-        $engine.ping()
-        send({type: 'toggle', data: 'SonifyButton'})
-        if(currentTimer) timer.clear()
-        currentTimer = timer.set(mute, 3000)
-    }
-
-    function mute() {
-        $engine.mute();
-        send({ type: "toggle", data: "Mute" });
-    }
 
 </script>
 
@@ -51,7 +47,7 @@
             <Hint>
                 <button class="button has-text-dark has-text-weight-bold pl-4 pr-4"
                         aria-label="show table"
-                        on:click={toggleView}>
+                        on:mousedown={toggleView}>
                     <span>
                         {#if $visible}
                             { numberRows + ' rows ' + Object.keys(data).length + ' columns'}
@@ -88,8 +84,9 @@
             {#if currentEngineState !== Sound.UNMOUNTED}
             <Hint>
                 <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover "
-                on:click={handleSonifyClick}>Sonify
-                </button>
+                        on:mousedown={handleSonifyClick}
+                        on:mouseup={handleSonifyClick}
+                >Sonify</button>
                 <i slot="hint" class={globStyle.toolTip}>Sonify data set</i>
             </Hint>
             {/if}

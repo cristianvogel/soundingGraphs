@@ -1,14 +1,14 @@
-// based on code by @miu 🙏🏽
+// based on code by @miunau 🙏🏽
 
 import type { Writable } from 'svelte/store';
-import { interpret } from 'robot3';
-import { writable } from 'svelte/store';
-
 import type { Machine, SendFunction } from 'robot3';
+import { interpret } from 'robot3';
+import { writable } from "svelte/store";
+
 
 interface MachineStore {
   (machine: Machine, initialContext?: any): {
-    store: Writable<{ state: string; context }>;
+    store: Writable<{ state: string, context }>;
     send: SendFunction<any>;
     machine: Machine;
   };
@@ -28,6 +28,7 @@ export const createMachineStore: MachineStore = (
     (service) => {
       if (service.machine.current === 'error') {
         console.trace();
+
         console.error(
           'state',
           service.machine.current,
@@ -44,10 +45,11 @@ export const createMachineStore: MachineStore = (
 
   const store = writable({
     state: machine.current,
-    context: service.context,
+    context: service.context
   });
 
   const send = service.send;
 
   return { store, send, machine };
 };
+

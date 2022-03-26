@@ -6,7 +6,7 @@
 
 <script context="module">
     export async function load() {
-        const url = `/text/local-md/TutorialMapping.md`;
+        const url =`static/text/local-md/TutorialMapping.md`;
         const res = await fetch(url);
         const post = await res.text();
         return {props: {post}}
@@ -17,9 +17,9 @@
 <script>
     export let post;
     import {interpolateInferno} from "d3-scale-chromatic";
-    import fileIO from "../script/fileIO.ts";
+    import fileIO from "$lib/common/fileIO.ts";
     import Icon from '@iconify/svelte';
-    import {noise} from '../script/synthesiseData'
+    import {noise} from '../script/synthesiseData.ts'
     import { fly, slide, fade } from 'svelte/transition';
     import {marked} from "marked";
         marked.setOptions({

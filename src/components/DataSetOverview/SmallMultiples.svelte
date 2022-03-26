@@ -7,7 +7,7 @@
 {#if $dataSets.length}
     {#each $dataSets as metadata, index }
         <thead class="tableTitle">{metadata.title}</thead>
-        <SmallGraphs data={metadata.columnsWithHeaders} source={metadata.source} tableTitle={metadata.title}/>
+        <SmallGraphs data={metadata.columnsWithHeaders} source={metadata.source} tableTitle={metadata.title} on:smallGraph.scrubbed/>
         <ViewAsTable data={metadata.columnsWithHeaders} {index} />
     {/each}
 {/if}

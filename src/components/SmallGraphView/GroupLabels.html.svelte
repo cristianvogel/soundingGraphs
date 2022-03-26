@@ -8,7 +8,7 @@
 <script>
     import { getContext } from 'svelte';
     import { op } from 'arquero';
-    import { TEXT_CHAR_LIMIT } from '$lib/Globals.ts'
+    import { TEXT_CHAR_LIMIT } from '$lib/common/globals.ts'
 
     const { data, x, y, xScale, yScale, xRange, yRange, z } = getContext('LayerCake');
 

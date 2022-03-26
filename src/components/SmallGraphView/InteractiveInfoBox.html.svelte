@@ -3,7 +3,7 @@
   Generates a tooltip that works on multiseries datasets, like multiline charts. It creates a tooltip showing the name of the series and the current value. It finds the nearest data point using the [GraphInteraction.html.svelte](https://layercake.graphics/components/QuadTree.html.svelte) component.
  -->
 <script>
-    import { getContext } from 'svelte';
+    import { createEventDispatcher, getContext } from "svelte";
     import { format } from 'd3-format';
     import GraphInteraction from './QuadTree.html.svelte';
     import OvalMark from "../GraphicalExtras/OvalMark.svelte";
@@ -50,6 +50,18 @@
         return rows;
     }
 
+    const dispatch = createEventDispatcher();
+
+    function emitSound(value) {
+        dispatch('smallGraph.scrubbed', {
+            label: header,
+            colour: tint,
+            // selected: view.selected,
+            tableTitle: tableTitle,
+            value: value
+        });
+    }
+
 </script>
 
 <GraphInteraction
@@ -77,7 +89,8 @@
             <div class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
                 {formatTitle(header)}</div>
             {#each foundSorted as row}
-                <div class="row"><span class="key">{formatKey(row.key)}∙</span> {formatValue(row.value)}</div>
+                {@const emitAndRead = ()=> {if (row.key === 'y') emitSound(row.value); return (row.key) } }
+                <div class="row"><span class="key">Axis: {formatKey(emitAndRead())}∙</span> Value: {formatValue(row.value)}</div>
             {/each}
             <nav class="level">
                 <OvalMark {tint} _class="level-left"/>
