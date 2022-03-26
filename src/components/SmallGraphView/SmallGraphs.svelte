@@ -1,7 +1,7 @@
 
 <script>
     import SmallGraphInstance from './SmallGraphInstance.svelte';
-    import {mapDataToXYPoints, columnCount } from "$lib/common/DataUtils";
+    import {mapDataToXYPoints, columnCount } from "../../lib/common/dataUtils.js";
     import {onMount} from "svelte";
     import {from, op} from 'arquero';
     import {calcExtents, flatten} from "layercake";
