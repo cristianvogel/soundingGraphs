@@ -7,15 +7,26 @@
 
 import { el, ElementaryWebAudioRenderer as core } from "@elemaudio/core-lite";
 import { ControlWaves, FSM_STATE_ACTORS, Sound } from "../common/globals";
-import { audioStore } from "../stores/audioStores";
+import { audioStore, speechEngine } from "../stores/audioStores";
 import { machine, send, store } from "../stateMachinery/engineStateService";
-import { get } from "svelte/store";
+import { speechStore } from "../stores/audioStores";
+import { get, Writable } from "svelte/store";
+import { Speech } from "./speech";
+import { fsmToggle } from "../../lib/stores/fsmStoreNew";
+
+const simpleSwitch = fsmToggle;
+
 
 const fsm = { store: store, send: send, machine: machine }
+const voiceGuide = new Speech()
 
 interface AudioContextInfo {
   context: AudioContext,
   status: AudioContextState
+}
+
+export type Engine = {
+  scrubGraphSound: Function
 }
 
 type Voice = { gate: number; freq: number; key: string }
@@ -234,15 +245,19 @@ class Elementary extends AudioEngine  {
     this.render(  ping  )
   }
 
-  clicks( rate )  {
+  scrubGraphSound(dataValue:number, dataSource?:string  )  {
+
+    if (get(simpleSwitch)==='off') return;
     const engineState = get(store).state;
-    if (typeof rate !== 'number' ) { console.log( 'error in data' ); return }
-    console.log(`Scrub  ⤼ ${engineState}`);
+    const { isActive: voiceActive, latestUtterance } = get(speechStore)
+
+    if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
+    if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
     if (engineState===(Sound.PAUSED || Sound.UNMOUNTED)) return
     const gate =  0.25
     const click = el.mul(
                     el.cycle(
-                        el.const( {value: rate + 130 , key: 'scrubPitch'} )
+                        el.const( {value: dataValue + 130 , key: 'scrubPitch'} )
                       ),
                     el.sm(gate)
                   )
@@ -254,6 +269,10 @@ class Elementary extends AudioEngine  {
     }
 
     this.render( el.add( el.mul( 0.25, echo(click) ) ) )
+  }
+
+  say( text:string) {
+    voiceGuide.speak(text)
   }
 
   render( sound ): void  {

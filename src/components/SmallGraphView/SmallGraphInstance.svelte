@@ -2,11 +2,10 @@
     // https://layercake.graphics/guide
 
     import {LayerCake, ScaledSvg, Html, flatten} from 'layercake';
-    import InteractiveInfoBox from './InteractiveInfoBox.html.svelte';
+    import InteractiveInfoBox from './InteractiveInfoBox.svelte';
     import Labels from './GroupLabels.html.svelte';
     import Line from './Line.svelte';
     import { getContext } from "svelte";
-
     export let data;
     export let fullExtents;
     export let extentGetters;
@@ -36,6 +35,7 @@
         pointerEvents = true
 >
     <Labels {header} {highlight} {normStep}  />
+
     <ScaledSvg viewBox='0 0 100 100'>
          <Line stroke={ tints[highlight ? 'bgDarker' : 'bg']( normStep )} {highlight}/>
     </ScaledSvg>

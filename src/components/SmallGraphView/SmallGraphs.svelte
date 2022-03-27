@@ -68,7 +68,6 @@
                         {tableTitle}
                         on:smallGraph.scrubbed
                 />
-
             </div>
         {/each}
         <div class="subtitle p-3 is-size-7"> Source:

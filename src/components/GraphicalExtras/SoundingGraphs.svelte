@@ -1,8 +1,8 @@
 <script>
-  import Icon from "@iconify/svelte";
+  export let size = 4
 </script>
 
-<span class="rainbow-text has-text-weight-bold is-size-4">SOUNDING GRAPHS</span> <i class="ml-2 mt-2 is-size-4"></i>
+<span class="rainbow-text has-text-weight-bold is-size-{size}">SOUNDING GRAPHS</span> <i class="ml-2 mt-2 is-size-{size}"></i>
 
 <style>
     .rainbow-text {

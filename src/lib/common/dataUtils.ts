@@ -59,7 +59,6 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
  *          todo: actually parse dates, times and hours and use those instead
  * @returns {*[]}  Array of data objects keyed by x: and y: no longer in Arquero table format
  */
-
 export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" : [] })) {
     const arqueroTable =  table(dataColumns)
     // @ts-ignore
@@ -96,3 +95,4 @@ export function clamp( value: number, min: number, max: number)
 {
     return Math.max( min, Math.min( value, max))
 }
+

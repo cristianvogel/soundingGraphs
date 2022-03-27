@@ -1,51 +1,39 @@
 <script lang="ts">
   import Speaker from "../GraphicalExtras/Speaker.svelte";
-  import { FSM_STATE_ACTORS, Sound } from "../../lib/common/globals";
   import { audioEngine, audioStore } from "../../lib/stores/audioStores";
-  import { send, store } from "../../lib/stateMachinery/engineStateService";
+  import { fsmToggle } from "../../lib/stores/fsmStoreNew";
 
-  $: sounding = ($store.state === Sound.PLAYING);
+  const simpleSwitch = fsmToggle;
+
+  $: sounding = ($simpleSwitch === 'on');
   $: engine = audioEngine;
 
-  let currentTimer;
-
   function handleClick(e) {
-      ping(e.type === "mousedown" ? 1 : 0);
-      pauseAfter( 500 )
+      if (e.type === 'mouseup' ) {
+        simpleSwitch.toggle();
+        if ($simpleSwitch === 'off') mute()
+      }
+
+      ping(e.type === 'mousedown' ? 1 : 0);
   }
 
   function ping(onOff:number ) {
-    send('play')
     $engine.resume();
     $engine.ping( onOff );
   }
 
   function mute() {
-    send('pause')
+    if( $simpleSwitch === 'on' ) simpleSwitch.toggle()
     $engine.mute();
-  }
-
-  function pause() {
-    send('pause')
-  }
-
-  function muteAfter(millis ) {
-    if(currentTimer) clearTimeout(currentTimer)
-    currentTimer = setTimeout(mute, millis)
-  }
-
-  function pauseAfter(millis ) {
-    if(currentTimer) clearTimeout(currentTimer)
-    currentTimer = setTimeout(pause, millis)
   }
 
 </script>
 
 {#if $audioStore.elementaryReady }
-  <button class={ 'button is-rounded is-small is-' + (sounding ? 'danger' : 'light')}
-          on:mouseup = { handleClick }
+  <button class={ 'button is-rounded is-small is-' + (sounding ? 'danger' : 'light')} value={$simpleSwitch}
           on:mousedown={ handleClick }
-  ><Speaker/></button>
+          on:mouseup = { handleClick }
+  ><Speaker/>{$simpleSwitch}</button>
   {:else }
   <button class={ 'button is-rounded is-small is-light is-loading'}></button>
 {/if}

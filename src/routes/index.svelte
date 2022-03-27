@@ -2,22 +2,22 @@
 <svelte:head>
     <title>Sounding Graphs (🚨 Work In Progress)</title>
 </svelte:head>
-<script>
-    import TrackOverview from "../components/DataSetOverview/Overview.svelte";
-    import { audioEngine } from "$lib/stores/audioStores.ts";
-    import { store } from "$lib/stateMachinery/engineStateService.ts";
-    import { Sound } from "$lib/common/globals.ts";
+<script lang="ts">
+    import MainOverview from "../components/DataSetOverview/MainOverview.svelte";
+    import { audioEngine, audioStore } from "$lib/stores/audioStores.ts";
+    import { Writable } from "svelte/store";
+    import type Elementary from "../lib/audio/audioEngine";
+    import { fade, draw, fly } from 'svelte/transition';
 
-    $: currentEngineState = $store.state;
-    $: sounding = currentEngineState === Sound.PLAYING || false;
+    let engine:Writable<Elementary>
     $: engine = audioEngine;
 
     function handleScrub(e) {
         //console.log( `scrub data value: ${e.detail.value}`)
-        $engine.clicks(e.detail.value)
+        $engine.scrubGraphSound(e.detail.value, e.detail.label)
     }
 
 </script>
-    <TrackOverview on:smallGraph.scrubbed={handleScrub}/>
-
-
+{#if $audioStore.elementaryReady }
+    <MainOverview on:smallGraph.scrubbed={handleScrub}/>
+{/if}

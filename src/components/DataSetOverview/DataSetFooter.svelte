@@ -1,29 +1,37 @@
-<script>
+<script lang="ts">
     import Hint from "svelte-hint";
     import {globStyle} from '../../assets/styleDefs.js'
     import {fade} from 'svelte/transition';
     import {rowCount} from "$lib/common/dataUtils.ts";
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
-    import { audioEngine, audioStore } from "../../lib/stores/audioStores";
-    import { send, store } from "../../lib/stateMachinery/engineStateService";
-    import { FSM_STATE_ACTORS, Sound } from "../../lib/common/globals";
+    import { audioEngine } from "../../lib/stores/audioStores";
+    import { fsmToggle } from "../../lib/stores/fsmStoreNew";
 
-    $: currentEngineState = $store.state;
-    $: sounding = (currentEngineState === Sound.PLAYING) || false;
+    const simpleSwitch = fsmToggle;
+    let engine;
+    let sounding;
+
+    $: sounding = ($simpleSwitch === 'on');
     $: engine = audioEngine;
 
-    let currentTimer;
+    function handleClick(e) {
+        if (e.type === 'mouseup' ) {
+            simpleSwitch.toggle();
+            if ($simpleSwitch === 'off') mute()
+        }
 
-    async function handleClick(e) {
-        console.log( `click state ${e.type} ${currentEngineState}`)
-        ping(e.type === "mousedown" ? 1 : 0);
+        ping(e.type === 'mousedown' ? 1 : 0);
     }
 
-    function ping( onOff ) {
-        send({ type: 'play', data: FSM_STATE_ACTORS.SONIFY_BUTTON })
+    function ping(onOff:number ) {
         $engine.resume();
         $engine.ping( onOff );
+    }
+
+    function mute() {
+        if( $simpleSwitch === 'on' ) simpleSwitch.toggle()
+        $engine.mute();
     }
 
     export let data = {}
@@ -32,12 +40,6 @@
     const {toggleView, visible} = getContext('table.status')
     const {inc, dec} = getContext('table.jump')
     const numberRows = rowCount(data);
-    const wait = (f, ms) => setTimeout(f, ms);
-
-    function handleSonifyClick( e ) {
-        ping(e.type === "mousedown" ? 1 : 0);
-    }
-
 
 </script>
 
@@ -81,15 +83,14 @@
             {/if}
         </div>
         <div class="navbar-end p-2">
-            {#if currentEngineState !== Sound.UNMOUNTED}
             <Hint>
                 <button id="import" class="button has-text-black-bis  has-text-weight-bold pl-4 pr-4 hover "
-                        on:mousedown={handleSonifyClick}
-                        on:mouseup={handleSonifyClick}
+                        on:mousedown={handleClick}
+                        on:mouseup={handleClick}
+                        aria-label="Begin scrub sonification"
                 >Sonify</button>
-                <i slot="hint" class={globStyle.toolTip}>Sonify data set</i>
+                <i slot="hint" class={globStyle.toolTip}>Sonify the graphs with your mouse</i>
             </Hint>
-            {/if}
         </div>
     </div>
 </div>

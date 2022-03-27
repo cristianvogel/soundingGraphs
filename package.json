@@ -31,7 +31,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@elemaudio/core-lite":  "^0.11.5",
+		"@elemaudio/core-lite": "^0.11.5",
 		"@iconify/json": "^2.0.33",
 		"@leodeslf/perlin-noise": "^1.1.2",
 		"arquero": "^4.8.8",
@@ -49,6 +49,7 @@
 		"layercake": "^6.1.0",
 		"marked": "^4.0.12",
 		"robot3": "^0.2.21",
+		"svelte-fsm": "^1.1.2",
 		"svelte-hint": "^1.0.0-rc.2"
 	}
 }

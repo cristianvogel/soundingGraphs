@@ -47,7 +47,6 @@
         dispatch('smallGraph.clicked', {
             label: header,
             colour: tint,
-            selected: view.selected,
             tableTitle: tableTitle
         });
     }

@@ -2,6 +2,7 @@
     /**
      * Component holds the site wide navbar with Icon and text UI elements
      * connecting to routes and other parts of the program
+     * also contains sound related UI features
      * Built on Bulma NavBar generic template with additional
      * tooltips provided by Svelte-Hint package
      */
@@ -9,20 +10,15 @@
     import Hint from "svelte-hint";
     import GraphBasket from "./DataSetOverview/GraphBasket.svelte";
     import InitialiseSound from "./Sound/InitialiseSound.svelte";
-    import { Sound } from "../lib/common/globals";
-    import { store } from "../lib/stateMachinery/engineStateService";
     import AudioAnimIcon from "./GraphicalExtras/AudioAnimIcon.svelte";
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
     import { selectedGraphs } from "../lib/stores/graphsViewStores";
+    import { fsmToggle } from "../lib/stores/fsmStoreNew";
 
-    $: engineState = $store.state;
+    const simpleSwitch = fsmToggle;
+    $: sounding = ($simpleSwitch === 'on');
 
-    let soundPlaying: boolean;
-
-    function audioEngineStatusChange( event ) {
-        soundPlaying = event.detail.text === Sound.PLAYING || false
-     }
 
 </script>
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
@@ -30,7 +26,7 @@
         <a class="navbar-item" href="">
 <!--        <img class="sonify-logo" src="/graphics/branding/sonify_icon.svg" width="216" height="28">-->
             <SoundingGraphs/>
-            {#if engineState===Sound.PLAYING }
+            {#if sounding}
                 <AudioAnimIcon/>
             {/if}
         </a>
@@ -100,7 +96,7 @@
             {/if}
             <VerticalDots/>
             <div class="navbar-item">
-                <InitialiseSound on:sound.status={audioEngineStatusChange}/>
+                <InitialiseSound />
             </div>
 
 <!--            <div class="navbar-item">-->

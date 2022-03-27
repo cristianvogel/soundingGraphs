@@ -5,7 +5,7 @@
 <script>
     import { createEventDispatcher, getContext } from "svelte";
     import { format } from 'd3-format';
-    import GraphInteraction from './QuadTree.html.svelte';
+    import GraphQuadTreeSearch from './QuadTree.svelte';
     import OvalMark from "../GraphicalExtras/OvalMark.svelte";
     import { fade } from "svelte/transition";
 
@@ -52,11 +52,10 @@
 
     const dispatch = createEventDispatcher();
 
-    function emitSound(value) {
+    function emitScrubData(value) {
         dispatch('smallGraph.scrubbed', {
             label: header,
             colour: tint,
-            // selected: view.selected,
             tableTitle: tableTitle,
             value: value
         });
@@ -64,7 +63,7 @@
 
 </script>
 
-<GraphInteraction
+<GraphQuadTreeSearch
         on:smallGraph.clicked
         dataset={dataset || $data}
         {header}
@@ -89,7 +88,7 @@
             <div class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
                 {formatTitle(header)}</div>
             {#each foundSorted as row}
-                {@const emitAndRead = ()=> {if (row.key === 'y') emitSound(row.value); return (row.key) } }
+                {@const emitAndRead = ()=> {if (row.key === 'y') emitScrubData(row.value); return (row.key) } }
                 <div class="row"><span class="key">Axis: {formatKey(emitAndRead())}∙</span> Value: {formatValue(row.value)}</div>
             {/each}
             <nav class="level">
@@ -98,7 +97,7 @@
             </nav>
         </div>
     {/if}
-</GraphInteraction>
+</GraphQuadTreeSearch>
 
 <style>
     .circleMark {
