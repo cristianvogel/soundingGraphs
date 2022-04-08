@@ -18,7 +18,6 @@
   }
 
   function ping(onOff:number ) {
-    $engine.resume();
     $engine.ping( onOff );
   }
 

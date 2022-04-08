@@ -1,12 +1,9 @@
 /*
-    Main audio engineStateMachine glue.
-    Move Elementary.core render to a Service
-
-    todo: fix master volume implementation
+    Main audio engineMachine glue.
  */
 
 import { el } from "@elemaudio/core";
-import { Sound } from "../common/globals";
+import { Sound, Waves } from "../common/globals";
 import { audioStore } from "../stores/audioStores";
 import { machine, send, store } from "../stateMachinery/engineStateService";
 import { speechStore } from "../stores/audioStores";
@@ -17,7 +14,7 @@ import getCore from "./elemWebRenderer";
 import { GraphScrubSynth } from "./tones";
 import { asSamplesFile } from "./samplers";
 import { FuncGen } from "./control";
-
+import type { FunctionGenerator } from "../../types/audio";
 
 type AudioContextInfo = {
   context: AudioContext,
@@ -72,11 +69,7 @@ class Elementary extends AudioEngine  {
   masterVolume: number;
   private actx: AudioContext;
   private sr: number
-  private envs = {
-    'FOUR_EXPO':  ()=> new FuncGen('FOUR_EXPO'),
-    'FOUR_PULSE': ()=> new FuncGen('FOUR_PULSE'),
-    'FOUR_REV': ()=> new FuncGen('FOUR_REV')
-  }
+  private funcGen: FunctionGenerator
 
   private constructor(baseACTX: AudioContext) {
     if (!baseACTX) throw new Error('Base AudioContext does not exist!')
@@ -103,26 +96,26 @@ class Elementary extends AudioEngine  {
       outputChannelCount: [2],
       processorOptions: {
         virtualFileSystem: {
-          "FOUR_PULSE": await(asSamplesFile(
-            {
-              url: 'waves/Fourcomplexpulse.wav',
-              category: 'wavetable',
-              local: true,
-              tag: 'FOUR_PULSE'
-            })),
-          "FOUR_EXPO": await(asSamplesFile(
+          'FourExpoFading': await(asSamplesFile(
             {
               url: 'waves/FourExpoFading.wav',
               category: 'wavetable',
               local: true,
-              tag: 'FOUR_EXPO'
+              tag: Waves.FOUR_EXPO
             })),
-          "FOUR_REV": await(asSamplesFile(
+          'FourReverseLinFade': await(asSamplesFile(
             {
               url: 'waves/FourReverseLinFade.wav',
               category: 'wavetable',
               local: true,
-              tag: 'FOUR_REV'
+              tag: Waves.FOUR_REV
+            })),
+          'FastBowing': await(asSamplesFile(
+            {
+              url: 'waves/FastBowing.wav',
+              category: 'wavetable',
+              local: true,
+              tag: Waves.FAST_BOW
             }))
         }
       }
@@ -134,6 +127,7 @@ class Elementary extends AudioEngine  {
       audioStore.update(store => ({ ...store, elementaryReady: true}))
       console.log("connecting node graph to destination... max channel count: \t" + this.actx.destination.maxChannelCount);
       elementaryNode.connect(this.actx.destination);
+      this.funcGen = new FuncGen( Waves.EXP, false )
     });
   }
 
@@ -158,14 +152,16 @@ class Elementary extends AudioEngine  {
       const unsub = simpleSwitch.subscribe((s)=> pingFreq = (s === 'on') ?  800 : 300 );
       const onOffSignal = el.const( {value: onOff, key: "pingGate" } )
 
-      const envL = this.envs.FOUR_EXPO().envelope({
+      const envL = this.funcGen.envelope({
         onOff: onOffSignal,
-        durMS: 2,
+        env: Waves.EXP,
+        durMS: 1,
         level: 0.7 })
 
-      const envR = this.envs.FOUR_EXPO().envelope({
+      const envR = this.funcGen.envelope({
         onOff: onOffSignal,
-        durMS: 16,
+        env: Waves.EXP,
+        durMS: 8,
         level: 0.1 })
 
       const pingL = el.mul (

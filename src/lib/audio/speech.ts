@@ -41,7 +41,7 @@ export class Speech {
     }
     utterThis.pitch = 0.8 + (Math.random()*0.2);
     utterThis.rate = 0.9;
-    utterThis.volume = 0.2;
+    utterThis.volume = 0.1;
     this.synth.speak(utterThis);
   }
 }

@@ -1,36 +1,25 @@
 import { el } from "@elemaudio/core";
-import { DEFAULT_TABLE_LENGTH } from "../common/globals";
-import type { ElementaryNode, FunctionGenerator, SampleBuffer } from "../../types/audio";
+import type { ElementaryNode, EnvelopeOptions, FunctionGenerator, SampleBuffer } from "../../types/audio";
 import type { MonoWaveTable } from "../../types/audio";
 import { msToHz, sampToMs } from "./helpers";
 import { randomID } from "../common/dataUtils";
+import { ComputedWaveTables } from "../../../static/waves/computedWaveTables";
+import { get } from "svelte/store";
+import { audioStore } from "../stores/audioStores";
+import { Waves } from "../common/globals";
 
-export function stayOnFor ( on = 1, onDurationInSeconds = 1 ) {
-  let oneShot = el.le(el.counter(on), el.mul(el.sr(), onDurationInSeconds))
-  return oneShot
+export const ControlWaves: Map<string, MonoWaveTable> = ComputedWaveTables
+
+export  function getSampleDataForWaveTable(wt:string): SampleBuffer | null {
+  console.log( `${wt} requested. Available? ${ControlWaves.has(wt)}`)
+  if (!wt) return null
+  if (get(audioStore).elementaryReady)
+  return (ControlWaves.has(wt) ? ControlWaves.get(wt).samples : null)
 }
 
-//// computed wave tables with 0 as last sample
-let expAttack: MonoWaveTable = {
-  name: 'EXP_ATTACK',
-  samples: Float32Array.from({ length: DEFAULT_TABLE_LENGTH }).map((_, i) => (i < DEFAULT_TABLE_LENGTH - 1) ? 1 / (i + 1) : 0),
-  lengthInSamples: DEFAULT_TABLE_LENGTH
-}
-
-let randomWave: MonoWaveTable = {
-  name: 'RANDOM_WAVE',
-  samples: Float32Array.from({length: DEFAULT_TABLE_LENGTH}).map((_,i) => (i < DEFAULT_TABLE_LENGTH-1) ? Math.random() : 0),
-  lengthInSamples: DEFAULT_TABLE_LENGTH
-}
-
-export const ControlWaves: Map<string, MonoWaveTable> = new Map()
-  .set(expAttack.name, expAttack)
-  .set(randomWave.name, randomWave)
-
-export function getSampleDataForWaveTable(wt:string): Float32Array {
-  return ControlWaves.has(wt) ? ControlWaves.get(wt).samples : null }
-
-
+//todo: this isn't actually the right calculation yet
+// want to figure out a rate scale factor ( to multiply with a hz cycle)
+// for conforming arbitrary wavetable lengths
 export function defaultRateFor(wt:string): number {
   return  (ControlWaves.has(wt) ?
     sampToMs(ControlWaves.get(wt).lengthInSamples)
@@ -38,44 +27,49 @@ export function defaultRateFor(wt:string): number {
 }
 
 export function addControlWave( wt: MonoWaveTable ) {
-  ControlWaves.set( wt.name || wt.tag, wt)
+  ControlWaves.set( wt.tag || wt.name, wt)
 }
 
 export function removeControlWave( wt: MonoWaveTable ) {
   if (ControlWaves.has(wt.name || wt.tag)) { ControlWaves.delete( wt.name || wt.tag ) }
 }
 
-export class FuncGen {
-  private onOff: ElementaryNode | number ;
-  private level: ElementaryNode | number = 1.0;
-  private durMS: number;
-  private env: string
-  private nodeKey: string
-  private table:SampleBuffer;
-  private seqEnv: ElementaryNode;
+export class FuncGen implements FunctionGenerator{
+   onOff: ElementaryNode | number ;
+   level: ElementaryNode | number = 1.0;
+   durMS: number;
+   env: string
+   nodeKey: string
+   table: SampleBuffer;
+   seqEnv: ElementaryNode;
 
   constructor( env: string, unique: boolean = true) {
+    this.table = getSampleDataForWaveTable(env)
     this.nodeKey = unique ? randomID() : env;
-    this.table = getSampleDataForWaveTable( env )
     this.env = env
+    this.seqEnv = el.const( {key: this.nodeKey, value: 0} )
   }
-  envelope( options : FunctionGenerator){
-    if (this.env !== options.env) this.table = getSampleDataForWaveTable( options.env ) || this.table
+  public envelope( options : EnvelopeOptions ) : ElementaryNode {
+
+    console.log( `${options.env} at envelope requested. Available? ${ControlWaves.has(options.env)}`)
+
+    if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
     Object.assign(this, options)
     let levelSignal = (typeof this.level === "number") ? el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
     let onOffSignal = (typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
-
-    const hz = msToHz(this.durMS * defaultRateFor(this.env)) * this.table.length;
-    if (this.table) this.seqEnv = el.seq2({
-        seq: Array.from(this.table),
-        hold: true,
-        loop: false},
-      el.train( el.const( {value: hz , key: `${this.nodeKey}.hz`} ) ),
-      onOffSignal );
-    return ( el.mul( el.sm( this.seqEnv ), levelSignal ) )
+    let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (48000 / 2)
+      this.seqEnv = el.seq2({
+          seq: Array.from(this.table),
+          hold: true,
+          loop: false
+        },
+        el.train(el.const({ value: hz, key: `${this.nodeKey}.hz` })),
+        onOffSignal);
+      return ( el.mul( el.sm( this.seqEnv ), levelSignal ) )
   }
 
-  dispose(){
+  public dispose(){
+    console.log( 'disposing?')
     this.table = null
     this.env = null
     this.seqEnv = null

@@ -15,5 +15,14 @@ export enum Sound {
     MAX_VOLUME = 2.0
 }
 
+export enum Waves {
+    EXP = 'EXP_ATTACK',
+    PERLIN = 'PERLIN_WAVE',
+    RANDOM = 'RANDOM_WAVE',
+    FOUR_REV = 'FOUR_REV',
+    FOUR_EXPO = 'FOUR_EXPO',
+    FAST_BOW = 'FAST_BOW'
+}
+
 
 
