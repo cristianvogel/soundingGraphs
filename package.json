@@ -31,7 +31,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@elemaudio/core-lite": "^0.11.5",
+		"@elemaudio/core": "^1.0.1",
+		"@elemaudio/web-renderer": "^1.0.1",
+		"@types/nick-thompson__elementary": "^0.9.0",
 		"@iconify/json": "^2.0.33",
 		"@leodeslf/perlin-noise": "^1.1.2",
 		"arquero": "^4.8.8",

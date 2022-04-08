@@ -26,7 +26,7 @@ export class Speech {
     if (!this.voices) this.populateVoiceList()
     const utterThis = new SpeechSynthesisUtterance(inputTxt);
     if (this.synth.speaking) {
-      console.error("speechSynthesis.speaking");
+      console.log("speechSynthesis.speaking");
       return;
     }
     if (inputTxt !== "") {
@@ -41,6 +41,7 @@ export class Speech {
     }
     utterThis.pitch = 0.8 + (Math.random()*0.2);
     utterThis.rate = 0.9;
+    utterThis.volume = 0.2;
     this.synth.speak(utterThis);
   }
 }

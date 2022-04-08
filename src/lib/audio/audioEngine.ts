@@ -5,81 +5,44 @@
     todo: fix master volume implementation
  */
 
-import { el, ElementaryWebAudioRenderer as core } from "@elemaudio/core-lite";
-import { ControlWaves, FSM_STATE_ACTORS, Sound } from "../common/globals";
-import { audioStore, speechEngine } from "../stores/audioStores";
+import { el } from "@elemaudio/core";
+import { Sound } from "../common/globals";
+import { audioStore } from "../stores/audioStores";
 import { machine, send, store } from "../stateMachinery/engineStateService";
 import { speechStore } from "../stores/audioStores";
-import { get, Writable } from "svelte/store";
+import { get } from "svelte/store";
 import { Speech } from "./speech";
 import { fsmToggle } from "../../lib/stores/fsmStoreNew";
+import getCore from "./elemWebRenderer";
+import { GraphScrubSynth } from "./tones";
+import { asSamplesFile } from "./samplers";
+import { FuncGen } from "./control";
 
-const simpleSwitch = fsmToggle;
 
-
-const fsm = { store: store, send: send, machine: machine }
-const voiceGuide = new Speech()
-
-interface AudioContextInfo {
+type AudioContextInfo = {
   context: AudioContext,
-  status: AudioContextState
+  status: AudioContextState,
+  sampleRate: number
 }
 
 export type Engine = {
   scrubGraphSound: Function
 }
 
-type Voice = { gate: number; freq: number; key: string }
-type MonoWaveTable = { channelData: Float32Array; lengthInSamples: number; name: string }
-export let waveTables: MonoWaveTable[] = []
+let core = getCore();
+const simpleSwitch = fsmToggle
+
+const voiceGuide = new Speech()
 
 abstract class AudioEngine {
-  /**
-   * @private there should only be one live AudioContext
-   * and it needs to be kept open for the engine
-   * to function in the app
-   */
   private static ctx: AudioContext;
-
-  /**
-   *
-   * @param ctx the live audio context
-   * @protected Singleton constructor pattern
-   */
   protected constructor(ctx: AudioContext) {
     AudioEngine.ctx = ctx
   }
-
-  async asSamplesFile(filename: string):Promise<MonoWaveTable> {
-    // validity check?
-    const ctx = AudioEngine.ctx
-    const source = ctx.createBufferSource();
-    const res = await fetch(filename);
-
-    await ctx.decodeAudioData( await res.arrayBuffer(), function(buffer) {
-        source.buffer = buffer
-        source.connect(ctx.destination);
-      },
-      function(e: DOMException){ console.log("Error with decoding audio data " + e.message); return e.code});
-
-    const samples = source.buffer.getChannelData(0)
-    const wt = { channelData: samples, lengthInSamples: samples.length, name: filename }
-    waveTables.push( wt )
-    return wt
+  public static getBaseContextInfo(): AudioContextInfo {
+    return  { context: AudioEngine.ctx, status: AudioEngine.ctx.state, sampleRate: AudioEngine.ctx.sampleRate } ;
   }
-
-  /**
-   * @protected Returns main audio context and operating information about it
-   */
-  protected getBaseAudioContext(): AudioContextInfo {
-    return  { context: AudioEngine.ctx, status: AudioEngine.ctx.state } ;
-  }
-
-  /**
-   * @param state
-   * @protected a method to switch base audio context state
-   */
-  protected  setAudioContextState(state:AudioContextState) {
+  protected setAudioContextState(state: AudioContextState) {
     if(AudioEngine.ctx) {
       switch (state) {
         case "closed":
@@ -92,60 +55,35 @@ abstract class AudioEngine {
           AudioEngine.ctx.resume();
       }
     }
-
   }
-
-  /**
-   *
-   * @param baseACTX Main audio context
-   * @protected Singleton instantiation of Elementary audio engine
-   *
-   */
-  protected static getInstanceOfElementary( baseACTX: AudioContext) { return };
-
-  /**
-   * main audio engine validation, mounting and initialisation
-   */
+  public static getInstanceOfElementary( baseACTX: AudioContext) { return };
   abstract mount();
-
-  /**
-   *  mute the audio graph without closing context
-   */
   abstract mute();
-
-  /**
-   * resume the main context , user interaction
-   * is needed always before browser will play any audio.
-   * Attach resume() to a UI button, to prompt user interaction
-   */
   protected resume() { this.setAudioContextState('running') };
-
   abstract ping();
   protected static masterVolume: number;
   abstract setMasterVolume(volume: number);
 }
 /////////////////////////////////////////////////////////////////////////////////
 
+// todo: bring this instantiation up to Elementary v1.0 allowing for offline renderer option
 class Elementary extends AudioEngine  {
   private static instance: Elementary;
   masterVolume: number;
   private actx: AudioContext;
   private sr: number
-  private controlWaves: {
-    sharp?: Array<number>,
-    rand?: Array<number>,
-    gaussian?: Array<number>
+  private envs = {
+    'FOUR_EXPO':  ()=> new FuncGen('FOUR_EXPO'),
+    'FOUR_PULSE': ()=> new FuncGen('FOUR_PULSE'),
+    'FOUR_REV': ()=> new FuncGen('FOUR_REV')
   }
 
   private constructor(baseACTX: AudioContext) {
     if (!baseACTX) throw new Error('Base AudioContext does not exist!')
     super(baseACTX);
-    this.actx = super.getBaseAudioContext().context;
+    this.actx = AudioEngine.getBaseContextInfo().context;
     this.masterVolume = 0.5;
     this.sr = this.actx.sampleRate
-    this.controlWaves = {
-      sharp: ControlWaves.EXP_ATTACK,
-      rand: ControlWaves.RANDOM }
   }
 
   public static getInstanceOfElementary( baseACTX: AudioContext): Elementary {
@@ -155,23 +93,37 @@ class Elementary extends AudioEngine  {
     return Elementary.instance;
   }
 
-  protected setEngineState(newState) {
-    fsm.send( {type: newState, data: FSM_STATE_ACTORS.STATE_CHANGE})
-  }
-
   async mount() {
     if (!this.actx) return false;
 
     super.setAudioContextState('suspended')
-    this.setEngineState('pause');
     const elementaryNode = await core.initialize(this.actx, {
       numberOfInputs: 0,
       numberOfOutputs: 1,
       outputChannelCount: [2],
       processorOptions: {
         virtualFileSystem: {
-          "/static/waves/ShortSharpPoly.wav": await(super.asSamplesFile('waves/ShortSharpPoly.wav'))
-            .then(( wt ) => wt.channelData)
+          "FOUR_PULSE": await(asSamplesFile(
+            {
+              url: 'waves/Fourcomplexpulse.wav',
+              category: 'wavetable',
+              local: true,
+              tag: 'FOUR_PULSE'
+            })),
+          "FOUR_EXPO": await(asSamplesFile(
+            {
+              url: 'waves/FourExpoFading.wav',
+              category: 'wavetable',
+              local: true,
+              tag: 'FOUR_EXPO'
+            })),
+          "FOUR_REV": await(asSamplesFile(
+            {
+              url: 'waves/FourReverseLinFade.wav',
+              category: 'wavetable',
+              local: true,
+              tag: 'FOUR_REV'
+            }))
         }
       }
     });
@@ -179,7 +131,7 @@ class Elementary extends AudioEngine  {
 
     core.on("load", (event) => {
       console.log("🔉 Elementary Audio ready -> " + Object.keys(event));
-      audioStore.update(store => ({ ...store, elementaryReady: true, waveTables: waveTables }))
+      audioStore.update(store => ({ ...store, elementaryReady: true}))
       console.log("connecting node graph to destination... max channel count: \t" + this.actx.destination.maxChannelCount);
       elementaryNode.connect(this.actx.destination);
     });
@@ -191,97 +143,75 @@ class Elementary extends AudioEngine  {
     audioStore.update(store => ({ ...store, contextState: 'running'  }))
   }
 
-  getMainContext() {
-    return super.getBaseAudioContext().context;
-  }
-
   getMainContextStatus() {
-    return super.getBaseAudioContext().status;
+    return AudioEngine.getBaseContextInfo().status;
   }
-
-  getEngineState() {
-    return get(fsm.store).state
-  }
-
-  getUIEvent() {
-      const uiActor =  get(fsm.store).context.actor
-    return uiActor
-    }
 
   setMasterVolume(volume: number) {
     this.masterVolume = Math.min(volume, Sound.MAX_VOLUME)
-    const level = el.const( {value: this.masterVolume, key: 'master.Volume' } )
-    const attenuated = el.sm( level )
-    this.render( attenuated );
   }
 
-  secToSamp ( periodInSecond )
-  {
-    console.log( periodInSecond * this.sr )
-    return ( periodInSecond * this.sr )
-  }
-
-  stayOnFor ( on = 1, onDurationInSeconds = 1 ) {
-    let oneShot = el.le(el.counter(on), el.mul(el.sr(), onDurationInSeconds))
-    return oneShot
-  }
-
-  env (onOff) {
-    let onOffSignal = el.const({key: 'onOff', value: onOff});
-    let table = this.controlWaves.sharp
-    let seqEnv = el.seq( {seq: table, hold: true, loop: false} , el.train(250), onOffSignal);
-
-    return el.mul( el.sm( seqEnv ) )
-  }
-
-  ping( onOff:number = 1) {
+  ping( onOff:number = 0.25) {
+      this.resume();
       this.setMasterVolume(0.5);
-      const ping = el.mul (
-                        this.env( onOff ),
-                        el.cycle((Date.now() % 24) + 3),
-                        el.cycle(800)
+      let pingFreq: number;
+      const unsub = simpleSwitch.subscribe((s)=> pingFreq = (s === 'on') ?  800 : 300 );
+      const onOffSignal = el.const( {value: onOff, key: "pingGate" } )
+
+      const envL = this.envs.FOUR_EXPO().envelope({
+        onOff: onOffSignal,
+        durMS: 2,
+        level: 0.7 })
+
+      const envR = this.envs.FOUR_EXPO().envelope({
+        onOff: onOffSignal,
+        durMS: 16,
+        level: 0.1 })
+
+      const pingL = el.mul (
+                        envL,
+                        el.cycle(el.const({value: (Date.now() % 24) + 3, key: 'pingLmod'})),
+                        el.cycle(el.const({value: pingFreq, key: 'pingL'}))
         )
 
-    this.render(  ping  )
+      const pingR = el.mul (
+                          envR,
+                          el.cycle(el.const({value: (Date.now() % 12) + 3, key: 'pingRmod'})),
+                          el.cycle(el.const({value: pingFreq * 1.618, key: 'pingR'}))
+      )
+    this.renderStereo(  pingL, pingR  )
   }
 
-  scrubGraphSound(dataValue:number, dataSource?:string  )  {
+  scrubGraphSonification(dataValue:number, dataSource?:string  )  {
 
-    if (get(simpleSwitch)==='off') return;
     const engineState = get(store).state;
     const { isActive: voiceActive, latestUtterance } = get(speechStore)
 
     if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
     if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
     if (engineState===(Sound.PAUSED || Sound.UNMOUNTED)) return
-    const gate =  0.25
-    const click = el.mul(
-                    el.cycle(
-                        el.const( {value: dataValue + 130 , key: 'scrubPitch'} )
-                      ),
-                    el.sm(gate)
-                  )
-    const echo = ( src ) => {
-      const input = el.dcblock(src)
-      return (
-          el.delay({ size: 44100, key: 'fx'}, el.ms2samps(123), 0.8, input)
-      )
-    }
+    this.setMasterVolume(0.8)
+    const synth = GraphScrubSynth( {freq: dataValue, gate: 1} )
+    this.render(synth)
+  }
 
-    this.render( el.add( el.mul( 0.25, echo(click) ) ) )
+  mute() {
+    this.setMasterVolume(0);
   }
 
   say( text:string) {
     voiceGuide.speak(text)
   }
 
-  render( sound ): void  {
-    core.render(sound, sound)
+  render( sound? ): void  {
+    const outM = el.mul( sound, el.sm( el.const( {key: 'zM' , value: this.masterVolume} ) ) )
+    core.render(outM, outM)
   }
 
-  mute() {
-    this.render( el.const( {key: 'z' , value: 0} ) )
-    this.setMasterVolume(0);
+  renderStereo( left?, right?) {
+    const outL = el.mul( left, el.sm( el.const( {key: 'zL' , value: this.masterVolume} ) ) )
+    const outR = el.mul( right, el.sm( el.const( {key: 'zR' , value: this.masterVolume} ) ) )
+    core.render(outL , outR)
   }
 
 }

@@ -1,13 +1,5 @@
-import { writable } from "svelte/store";
-import fsm from 'svelte-fsm'
-/**
- * Wrap an FSM in a Svelte store
- * @param machine Robot3 state machine
- */
 
-type State = {
-  state: string
-}
+import fsm from 'svelte-fsm'
 
 type SimpleSwitch = {
   initial:  ('off' | 'on') ,

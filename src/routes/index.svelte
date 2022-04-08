@@ -7,14 +7,16 @@
     import { audioEngine, audioStore } from "$lib/stores/audioStores.ts";
     import { Writable } from "svelte/store";
     import type Elementary from "../lib/audio/audioEngine";
-    import { fade, draw, fly } from 'svelte/transition';
+    import { fsmToggle } from "../lib/stores/fsmStoreNew";
 
+    const simpleSwitch = fsmToggle;
+    $: sounding = ($simpleSwitch === 'on');
     let engine:Writable<Elementary>
     $: engine = audioEngine;
 
     function handleScrub(e) {
-        //console.log( `scrub data value: ${e.detail.value}`)
-        $engine.scrubGraphSound(e.detail.value, e.detail.label)
+        if (!sounding) return;
+        $engine.scrubGraphSonification(e.detail.value, e.detail.label)
     }
 
 </script>

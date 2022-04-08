@@ -1,11 +1,15 @@
 import { op, table} from 'arquero';
-
+import { nanoid } from 'nanoid'
 /**
  * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
  */
 
 export function normalizeText( text ) {
     return normalize_column( text )
+}
+
+export function randomID() {
+    return nanoid(8)
 }
 
 function normalize_column(name) {
@@ -91,8 +95,6 @@ export function prune( arr, el ) {
     return arr
 }
 
-export function clamp( value: number, min: number, max: number)
-{
-    return Math.max( min, Math.min( value, max))
+export function clamp (n: number, min = 0, max = 1) {
+    return Math.max(Math.min(n, max), min);
 }
-

@@ -4,7 +4,8 @@ import type Elementary from "../audio/audioEngine";
 type AudioStore = {
   context: AudioContext
   contextState: AudioContextState
-  elementaryReady: boolean
+  elementaryReady: boolean,
+  sampleRate: number
 }
 
 type SpeechStore = {
@@ -17,7 +18,11 @@ type SpeechStore = {
 //audio
 export const audioEngine: Writable<Elementary> = writable()
 export const audioStore: Writable<AudioStore> = writable(
-  { context: null, contextState: 'suspended', elementaryReady: false }
+  { context: null,
+    contextState: 'suspended',
+    elementaryReady: false,
+    sampleRate: 44100
+  }
 )
 
 //speech

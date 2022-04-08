@@ -2,7 +2,8 @@
   export let size = 4
 </script>
 
-<span class="rainbow-text has-text-weight-bold is-size-{size}">SOUNDING GRAPHS</span> <i class="ml-2 mt-2 is-size-{size}"></i>
+<span class="rainbow-text has-text-weight-bold is-size-{size}" style="cursor: pointer">SOUNDING GRAPHS</span> <i class="ml-2 mt-2 is-size-{size}"></i>
+
 
 <style>
     .rainbow-text {

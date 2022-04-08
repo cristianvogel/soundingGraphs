@@ -6,7 +6,6 @@
 <script>
     import { getContext } from 'svelte';
     import { op } from 'arquero';
-
     const { data, xGet, yGet } = getContext('LayerCake');
 
     export let stroke = '#111';
@@ -33,7 +32,7 @@
 
 </script>
 
-    <path class="path-line {highlight ? 'selected' : ''}" d='{path}' {stroke}></path>
+    <path class="path-line {highlight ? 'selected' : ''}" d='{path}' {stroke} ></path>
 <style>
     .path-line {
         fill: none;
