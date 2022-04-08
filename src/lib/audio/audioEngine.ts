@@ -153,7 +153,7 @@ class Elementary extends AudioEngine  {
 
   ping( onOff:number = 0.25) {
       this.resume();
-      this.setMasterVolume(0.5);
+      this.setMasterVolume(0.3);
       let pingFreq: number;
       const unsub = simpleSwitch.subscribe((s)=> pingFreq = (s === 'on') ?  800 : 300 );
       const onOffSignal = el.const( {value: onOff, key: "pingGate" } )
