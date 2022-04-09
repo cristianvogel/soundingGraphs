@@ -16,7 +16,7 @@
 <!--component-->
 <script>
     export let post;
-    import { perlinNoiseArray } from "../script/perlinNoiseArray.js";
+    import { perlinNoiseArray } from "../script/perlinNoise";
     import {interpolateInferno} from "d3-scale-chromatic";
     import fileIO from "$lib/common/fileIO.ts";
     import Icon from '@iconify/svelte';
