@@ -1,14 +1,11 @@
 /*
-    Main audio engineStateMachine glue.
-    Move Elementary.core render to a Service
-
-    todo: fix master volume implementation
+    Main audio engineMachine glue.
  */
 
 import { el } from "@elemaudio/core";
-import { Sound } from "../common/globals";
+import { Sound, Waves } from "../common/globals";
 import { audioStore } from "../stores/audioStores";
-import { machine, send, store } from "../stateMachinery/engineStateService";
+import { store } from "../stateMachinery/engineStateService"; // todo: move to simpler store
 import { speechStore } from "../stores/audioStores";
 import { get } from "svelte/store";
 import { Speech } from "./speech";
@@ -17,6 +14,8 @@ import getCore from "./elemWebRenderer";
 import { GraphScrubSynth } from "./tones";
 import { asSamplesFile } from "./samplers";
 import { FuncGen } from "./control";
+import type { FunctionGenerator } from "../../types/audio";
+import { echo } from "./effects";
 
 
 type AudioContextInfo = {
@@ -31,7 +30,6 @@ export type Engine = {
 
 let core = getCore();
 const simpleSwitch = fsmToggle
-
 const voiceGuide = new Speech()
 
 abstract class AudioEngine {
@@ -72,11 +70,7 @@ class Elementary extends AudioEngine  {
   masterVolume: number;
   private actx: AudioContext;
   private sr: number
-  private envs = {
-    'FOUR_EXPO':  ()=> new FuncGen('FOUR_EXPO'),
-    'FOUR_PULSE': ()=> new FuncGen('FOUR_PULSE'),
-    'FOUR_REV': ()=> new FuncGen('FOUR_REV')
-  }
+  private funcGens: FunctionGenerator [] = new Array()
 
   private constructor(baseACTX: AudioContext) {
     if (!baseACTX) throw new Error('Base AudioContext does not exist!')
@@ -103,37 +97,41 @@ class Elementary extends AudioEngine  {
       outputChannelCount: [2],
       processorOptions: {
         virtualFileSystem: {
-          "FOUR_PULSE": await(asSamplesFile(
-            {
-              url: 'waves/Fourcomplexpulse.wav',
-              category: 'wavetable',
-              local: true,
-              tag: 'FOUR_PULSE'
-            })),
-          "FOUR_EXPO": await(asSamplesFile(
+          [Waves.FOUR_EXPO]: await(asSamplesFile(
             {
               url: 'waves/FourExpoFading.wav',
               category: 'wavetable',
               local: true,
-              tag: 'FOUR_EXPO'
+              tag: Waves.FOUR_EXPO
             })),
-          "FOUR_REV": await(asSamplesFile(
+          [Waves.FOUR_REV]: await(asSamplesFile(
             {
               url: 'waves/FourReverseLinFade.wav',
               category: 'wavetable',
               local: true,
-              tag: 'FOUR_REV'
+              tag: Waves.FOUR_REV
+            })),
+          [Waves.FAST_BOW]: await(asSamplesFile(
+            {
+              url: 'waves/FastBowing.wav',
+              category: 'wavetable',
+              local: true,
+              tag: Waves.FAST_BOW
             }))
         }
       }
     });
-
 
     core.on("load", (event) => {
       console.log("🔉 Elementary Audio ready -> " + Object.keys(event));
       audioStore.update(store => ({ ...store, elementaryReady: true}))
       console.log("connecting node graph to destination... max channel count: \t" + this.actx.destination.maxChannelCount);
       elementaryNode.connect(this.actx.destination);
+
+      for (const wave in Waves) {
+        this.funcGens.push( new FuncGen(wave) )
+      }
+
     });
   }
 
@@ -155,30 +153,42 @@ class Elementary extends AudioEngine  {
       this.resume();
       this.setMasterVolume(0.3);
       let pingFreq: number;
-      const unsub = simpleSwitch.subscribe((s)=> pingFreq = (s === 'on') ?  800 : 300 );
+      let sounding: boolean
+      const unsub = simpleSwitch.subscribe((s)=> sounding = (s === 'on')  );
+
+      pingFreq = (sounding) ?  800 : 300
       const onOffSignal = el.const( {value: onOff, key: "pingGate" } )
 
-      const envL = this.envs.FOUR_EXPO().envelope({
+      const envL = this.funcGens[0].envelope({
         onOff: onOffSignal,
-        durMS: 2,
-        level: 0.7 })
+        env: Waves.FAST_BOW,
+        durMS: 0.01,
+        level: 0.2 })
 
-      const envR = this.envs.FOUR_EXPO().envelope({
+      const envR = this.funcGens[1].envelope({
         onOff: onOffSignal,
-        durMS: 16,
-        level: 0.1 })
+        env: Waves.FOUR_REV,
+        durMS: 0.005,
+        level: 1 })
 
-      const pingL = el.mul (
+      let pingL = el.mul (
                         envL,
                         el.cycle(el.const({value: (Date.now() % 24) + 3, key: 'pingLmod'})),
                         el.cycle(el.const({value: pingFreq, key: 'pingL'}))
         )
 
-      const pingR = el.mul (
+      let pingR = el.mul (
                           envR,
                           el.cycle(el.const({value: (Date.now() % 12) + 3, key: 'pingRmod'})),
                           el.cycle(el.const({value: pingFreq * 1.618, key: 'pingR'}))
       )
+      if (!sounding) {
+        pingR = echo(
+          { signal: el.mul(0.2, pingR),
+          timeConstantMS: 123,
+          feedback: 0.4,
+          id: 'ping-fx'} )
+      }
     this.renderStereo(  pingL, pingR  )
   }
 
@@ -190,7 +200,6 @@ class Elementary extends AudioEngine  {
     if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
     if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
     if (engineState===(Sound.PAUSED || Sound.UNMOUNTED)) return
-    this.setMasterVolume(0.8)
     const synth = GraphScrubSynth( {freq: dataValue, gate: 1} )
     this.render(synth)
   }

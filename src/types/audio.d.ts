@@ -18,12 +18,22 @@ export type SynthCR = {
 
 export type SampleBuffer = Float32Array;
 
-export type FunctionGenerator = {
+export type FunctionExpression = { expression: function }
+
+export type EnvelopeOptions = {
+  onOff: ElementaryNode,
+  durMS?: number,
+  env: string,
+  interp?: boolean,
+  level?: ElementaryNode
+}
+export interface FunctionGenerator {
   onOff: ElementaryNode,
   durMS?: number,
   env?: string,
   interp?: boolean,
-  level?: ElementaryNode
+  level?: ElementaryNode,
+  envelope: ( EnvelopeOptions ) => ElementaryNode
 }
 
 export type AudioFileName = {
@@ -52,4 +62,25 @@ export type MonoSampleFile = {
     loop?: boolean;
     tag?: string
   }
+}
+
+export type NoisyArrayOptions = {
+  size: number,
+  step: number,
+  initialOffset?: number,
+  fullRange?: boolean
+}
+
+export type NoiseStreamOptions = {
+  step?: number,
+  initialOffset?: number,
+  fullRange?: boolean
+}
+
+export type EffectParameters = {
+  signal: ElementaryNode,
+  timeConstantMS: number,
+  id?: string,
+  feedback?: number,
+  options?: { filter?: number }
 }

@@ -7,12 +7,11 @@
 
 import AudioEngine from "./audioEngine";
 import type { AudioFileName, MonoSampleFile, SampleBuffer } from "../../types/audio";
-import type { MonoWaveTable } from "../../types/audio";
-import { addControlWave, ControlWaves } from "./control";
+import { addControlWave } from "./control";
 
 export const MonoSamples : Map<String, MonoSampleFile> = new Map()
 
-export async function asSamplesFile  ( {url, category, tag = url}: AudioFileName ) : Promise<SampleBuffer>  {
+export async function asSamplesFile  ( {url, category, tag}: AudioFileName ) : Promise<SampleBuffer>  {
   const { context, status, sampleRate } = AudioEngine.getBaseContextInfo();
   if (!context) { console.log ( `Sample file loading bad context: ${status}`) }
 
@@ -32,10 +31,10 @@ export async function asSamplesFile  ( {url, category, tag = url}: AudioFileName
 
   switch (category) {
     case "wavetable":
-      addControlWave({ samples: samples, sampleRate: sampleRate, lengthInSamples: samples.length, name: tag });
+      addControlWave({ samples, sampleRate, lengthInSamples: samples.length, name: url, tag });
       break;
     case "sample":
-      addMonoSample({ samples: samples, sampleRate: sampleRate, lengthInSamples: samples.length, name: tag });
+      addMonoSample({ samples, sampleRate, lengthInSamples: samples.length, name: url, metadata: { tag } });
       break;
     case "multisample":
       break;
@@ -43,6 +42,6 @@ export async function asSamplesFile  ( {url, category, tag = url}: AudioFileName
   return samples
 }
 
-export function addMonoSample( wt: MonoSampleFile ) {
-  MonoSamples.set( wt.name || wt.metadata.tag, wt)
+export function addMonoSample( msf : MonoSampleFile) {
+  MonoSamples.set( msf.name || msf.metadata.tag, msf)
 }

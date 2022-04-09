@@ -16,10 +16,10 @@
 <!--component-->
 <script>
     export let post;
+    import { perlinNoiseArray } from "../script/perlinNoiseArray.js";
     import {interpolateInferno} from "d3-scale-chromatic";
     import fileIO from "$lib/common/fileIO.ts";
     import Icon from '@iconify/svelte';
-    import {noise} from '../script/synthesiseData.ts'
     import { fly, slide, fade } from 'svelte/transition';
     import {marked} from "marked";
         marked.setOptions({
@@ -37,7 +37,7 @@
         seed = Date.now(),
         rowLength =15;
 
-    $:noisyArray = (x = seed) =>  noise((30*8), 0.125, x);
+    $:noisyArray = (x = seed) =>  perlinNoiseArray( {size: (30*8), step: 0.125, initialOffset: x} );
 
     function toggleTable() {
         showTable = true;
