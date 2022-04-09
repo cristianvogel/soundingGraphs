@@ -151,7 +151,7 @@ class Elementary extends AudioEngine  {
 
   ping( onOff:number = 0.25) {
       this.resume();
-      this.setMasterVolume(0.5);
+      this.setMasterVolume(0.3);
       let pingFreq: number;
       let sounding: boolean
       const unsub = simpleSwitch.subscribe((s)=> sounding = (s === 'on')  );
