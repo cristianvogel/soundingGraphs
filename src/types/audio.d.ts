@@ -36,8 +36,6 @@ export interface FunctionGenerator {
   envelope: ( EnvelopeOptions ) => ElementaryNode
 }
 
-
-
 export type AudioFileName = {
   url: string;
   category: 'wavetable' | 'sample' | 'multisample';
@@ -77,4 +75,12 @@ export type NoiseStreamOptions = {
   step?: number,
   initialOffset?: number,
   fullRange?: boolean
+}
+
+export type EffectParameters = {
+  signal: ElementaryNode,
+  timeConstantMS: number,
+  id?: string,
+  feedback?: number,
+  options?: { filter?: number }
 }

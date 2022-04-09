@@ -4,16 +4,12 @@ import type { MonoWaveTable } from "../../types/audio";
 import { msToHz, sampToMs } from "./helpers";
 import { randomID } from "../common/dataUtils";
 import { ComputedWaveTables } from "../../../static/waves/computedWaveTables";
-import { get } from "svelte/store";
-import { audioStore } from "../stores/audioStores";
-import { Waves } from "../common/globals";
 
 export const ControlWaves: Map<string, MonoWaveTable> = ComputedWaveTables
 
 export  function getSampleDataForWaveTable(wt:string): SampleBuffer | null {
-  console.log( `${wt} requested. Available? ${ControlWaves.has(wt)}`)
   if (!wt) return null
-  if (get(audioStore).elementaryReady)
+//
   return (ControlWaves.has(wt) ? ControlWaves.get(wt).samples : null)
 }
 
@@ -36,7 +32,7 @@ export function removeControlWave( wt: MonoWaveTable ) {
 
 export class FuncGen implements FunctionGenerator{
    onOff: ElementaryNode | number ;
-   level: ElementaryNode | number = 1.0;
+   level: ElementaryNode | number = 0.75;
    durMS: number;
    env: string
    nodeKey: string
@@ -50,14 +46,12 @@ export class FuncGen implements FunctionGenerator{
     this.seqEnv = el.const( {key: this.nodeKey, value: 0} )
   }
   public envelope( options : EnvelopeOptions ) : ElementaryNode {
-
-    console.log( `${options.env} at envelope requested. Available? ${ControlWaves.has(options.env)}`)
-
+     console.log( `${options.env} at envelope requested. Available? ${ControlWaves.has(options.env)}`)
     if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
     Object.assign(this, options)
     let levelSignal = (typeof this.level === "number") ? el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
     let onOffSignal = (typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
-    let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (48000 / 2)
+    let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (48000 / (this.table.length || 512))
       this.seqEnv = el.seq2({
           seq: Array.from(this.table),
           hold: true,

@@ -21,7 +21,8 @@ export enum Waves {
     RANDOM = 'RANDOM_WAVE',
     FOUR_REV = 'FOUR_REV',
     FOUR_EXPO = 'FOUR_EXPO',
-    FAST_BOW = 'FAST_BOW'
+    FAST_BOW = 'FAST_BOW',
+    GEOMETRIC = 'GEOMETRIC_RND',
 }
 
 
