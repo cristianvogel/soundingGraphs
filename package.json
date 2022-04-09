@@ -31,7 +31,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@elemaudio/core": "^1.0.1",
+		"@elemaudio/core": "^1.0.0",
 		"@elemaudio/web-renderer": "^1.0.1",
 		"@iconify/json": "^2.0.33",
 		"@leodeslf/perlin-noise": "^1.1.2",
