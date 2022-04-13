@@ -1,9 +1,10 @@
 // Global static consts used around the code
 
-export const TEXT_CHAR_LIMIT: number = 24;
+export const TEXT_CHAR_LIMIT:number = 24
+export const EPSILON:number = 1.0e-4
 
 // Sound
-export const USING_SOUND_ENGINE: string  = 'Elementary';
+export const USING_SOUND_ENGINE:string  = 'Elementary'
 export const DEFAULT_TABLE_LENGTH = 512
 
 export enum Sound {
@@ -18,11 +19,12 @@ export enum Sound {
 export enum Waves {
     EXP = 'EXP_ATTACK',
     PERLIN = 'PERLIN_WAVE',
-    RANDOM = 'RANDOM_WAVE',
+    RANDOM_GAUSS = 'RANDOM_GAUSS',
     FOUR_REV = 'FOUR_REV',
     FOUR_EXPO = 'FOUR_EXPO',
     FAST_BOW = 'FAST_BOW',
     GEOMETRIC = 'GEOMETRIC_RND',
+    REV_EXP = 'REV_EXP',
 }
 
 

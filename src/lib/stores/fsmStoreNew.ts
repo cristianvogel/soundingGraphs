@@ -17,5 +17,5 @@ const { initial, states }: SimpleSwitch = {
   }
 }
 
-export const fsmToggle = fsm( initial, states )
+export const soundToggle = fsm( initial, states )
 

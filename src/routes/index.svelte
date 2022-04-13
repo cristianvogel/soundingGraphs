@@ -1,15 +1,15 @@
 <!-- main app UI -->
 <svelte:head>
-    <title>Sounding Graphs (🚨 Work In Progress)</title>
+    <title>Sounding Graphs by Cristian Vogel (🚨 Work In Progress)</title>
 </svelte:head>
 <script lang="ts">
     import MainOverview from "../components/DataSetOverview/MainOverview.svelte";
     import { audioEngine, audioStore } from "$lib/stores/audioStores.ts";
     import { Writable } from "svelte/store";
     import type Elementary from "../lib/audio/audioEngine";
-    import { fsmToggle } from "../lib/stores/fsmStoreNew";
+    import { soundToggle } from "../lib/stores/fsmStoreNew";
 
-    const simpleSwitch = fsmToggle;
+    const simpleSwitch = soundToggle;
     $: sounding = ($simpleSwitch === 'on');
     let engine:Writable<Elementary>
     $: engine = audioEngine;

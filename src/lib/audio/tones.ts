@@ -20,7 +20,7 @@ export function GraphScrubSynth(
       const onOff = el.const( {value: delta === freq ? 0 : gate, key: 'fq.changed'} )
       const absDerivative = clamp(Math.abs( freq - delta ), 100, 500)
       ping  = el.mul(
-                    func.envelope( {onOff: onOff, durMS: 25, level: 0.4, env: Waves.EXP} ),
+                    func.envelope( {onOff: onOff, durMS: 25, level: 0.8, env: Waves.EXP} ),
                     el.cycle( el.add( el.const( { value: clamp(freq, 100, 6000), key: 'scrubFreq'}) , 113 ) )
                 )
       delta = freq;

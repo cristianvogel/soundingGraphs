@@ -6,9 +6,9 @@
     import {getContext} from "svelte";
     import Icon from '@iconify/svelte';
     import { audioEngine } from "../../lib/stores/audioStores";
-    import { fsmToggle } from "../../lib/stores/fsmStoreNew";
+    import { soundToggle } from "../../lib/stores/fsmStoreNew";
 
-    const simpleSwitch = fsmToggle;
+    const simpleSwitch = soundToggle;
     let engine;
     let sounding;
 

@@ -1,47 +1,93 @@
-import { get, Writable } from "svelte/store";
-import { speechEngine, speechStore } from "../stores/audioStores";
+import { get } from "svelte/store";
+import { speechSynthesis, speechState } from "../stores/audioStores";
+import type { MappedVoice } from "../../types/audio";
 
 export class Speech {
 
-  synth;
-  voices:Array<SpeechSynthesisVoice>;
+  voices: Array<SpeechSynthesisVoice>
+  private speechVolume:number = 0.3
+  speaking: boolean = false
+  private wordCount = 0
+  private currentVoice: SpeechSynthesisVoice
+  private utterance: SpeechSynthesisUtterance
+
 
   constructor() {
-    //this.synth = get(speechEngine);
-    //this.populateVoiceList()
+    // weirdly cannot instantiate SpeechSynthesis in constructor without problems
+  }
+
+  private initSpeechUtterance(inputText: string): SpeechSynthesisUtterance {
+    const utterance = new SpeechSynthesisUtterance(inputText)
+    utterance.onstart = (event) => this.readyToSpeak();
+    utterance.onend = (event) => this.readyToSpeak();
+    utterance.onerror = function(event) {
+      console.error("SpeechSynthesisUtterance.onerror");
+    }
+    return utterance
   }
 
   populateVoiceList() {
-    this.voices = this.synth.getVoices().sort(function(a, b) {
-      const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
-      if (aname < bname) return -1;
-      else if (aname == bname) return 0;
+    this.voices = get(speechSynthesis).getVoices().sort(function(a, b) {
+      const nameA = a.name.toUpperCase(), nameB = b.name.toUpperCase();
+      if (nameA < nameB) return -1;
+      else if (nameA == nameB) return 0;
       else return +1;
     });
   }
 
-  speak(inputTxt:string) {
-    this.synth = get(speechEngine)
-    speechStore.update(store => ({ ...store, latestUtterance: inputTxt }))
+  speak(inputText:string) {
+    //todo: implement voices user selectable list
+    if (!get(speechSynthesis)) return
     if (!this.voices) this.populateVoiceList()
-    const utterThis = new SpeechSynthesisUtterance(inputTxt);
-    if (this.synth.speaking) {
-      console.log("speechSynthesis.speaking");
-      return;
-    }
-    if (inputTxt !== "") {
-      utterThis.onend = function(event) {
-        console.log("SpeechSynthesisUtterance.onend");
-      };
-      utterThis.onerror = function(event) {
-        console.error("SpeechSynthesisUtterance.onerror");
-      };
 
-      utterThis.voice = this.voices[21];
+    if (get(speechSynthesis).speaking) {
+      console.log("speechSynthesis.speaking");
+      this.speaking = true;
     }
-    utterThis.pitch = 0.8 + (Math.random()*0.2);
-    utterThis.rate = 0.9;
-    utterThis.volume = 0.3;
-    this.synth.speak(utterThis);
+
+    if (!this.speaking && inputText !== "") {
+      const utterance = this.initSpeechUtterance(inputText);
+      utterance.text = inputText
+      utterance.voice = this.currentVoice
+      utterance.pitch = 0.8 + (Math.random()*0.2);
+      utterance.rate = 0.9
+      if (utterance.volume !== this.speechVolume) utterance.volume = this.speechVolume
+      this.wordCount++
+      this.updateSpeechStore(inputText)
+      console.log(`Uttering ${inputText} at volume ${this.speechVolume}`)
+      get(speechSynthesis).speak(utterance)
+    }
+  }
+
+
+  private readyToSpeak() {
+    this.speaking = false;
+  }
+
+  private updateSpeechStore(inputText: string) {
+    speechState.update(store => ({
+      ...store,
+      latestUtterance: inputText,
+      currentVoice: this.currentVoice,
+      wordCount: this.wordCount
+    }));
+  }
+
+  getVoicesList():Map<string,MappedVoice>{
+    let voicesMap = new Map();
+    this.voices.map( ( v, i)  => {
+        voicesMap.set( v.name, { index: i, language: v.lang, voice: v } );
+      }
+     )
+    return voicesMap
+  }
+
+  setCurrentVoice( name:string){
+    const vox:SpeechSynthesisVoice = this.getVoicesList().get(name).voice
+    this.currentVoice = vox ? vox : this.currentVoice
+  }
+
+  setVolume( newVolume?:number ){
+    if ( newVolume !== this.speechVolume  ) this.speechVolume = newVolume
   }
 }

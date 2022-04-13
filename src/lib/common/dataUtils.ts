@@ -1,18 +1,35 @@
 import { op, table} from 'arquero';
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid';
+import { fitClamped as _fitClamped, norm as _norm, fit01} from "@thi.ng/math/fit";
+import { roundEps } from "@thi.ng/math";
+import { EPSILON } from "./globals";
+
 /**
  * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
  */
 
+export function fitClamped ( n:number, inMin:number, inMax:number,
+                                clampMin:number, clampMax:number) {
+    return roundEps( _fitClamped( n, inMin, inMax, clampMin, clampMax, ), EPSILON)
+}
+
+export function clamp (n: number, min = 0, max = 1) {
+    return Math.max(Math.min(n, max), min);
+}
+
+export function norm ( n:number, inMin:number, inMax:number) {
+    return _norm( n, inMin, inMax )
+}
+
 export function normalizeText( text ) {
-    return normalize_column( text )
+    return normalizeColName( text )
 }
 
 export function randomID() {
     return nanoid(8)
 }
 
-function normalize_column(name) {
+function normalizeColName(name) {
     if (!(name)) return
     return name.toUpperCase()            // map to lower case
         .replace(/[%#$£()\'\"]/g, '')      // remove unwanted characters
@@ -35,7 +52,6 @@ export function toFloat( v ) {
     return op.parse_float(v)
 }
 /**
- *
  * @param m Array containing array of data interpreted as being elements in a row
  * @returns {*} Rows transposed to being Columns
  */
@@ -57,7 +73,6 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
 }
 
 /**
- *
  * @param dataColumns data, will be converted to Arquero table inside this function
  *          adds a column tracking the rowNumber and uses that as a generic X-axis for plots
  *          todo: actually parse dates, times and hours and use those instead
@@ -95,6 +110,4 @@ export function prune( arr, el ) {
     return arr
 }
 
-export function clamp (n: number, min = 0, max = 1) {
-    return Math.max(Math.min(n, max), min);
-}
+

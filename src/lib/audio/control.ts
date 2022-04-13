@@ -30,6 +30,9 @@ export function removeControlWave( wt: MonoWaveTable ) {
   if (ControlWaves.has(wt.name || wt.tag)) { ControlWaves.delete( wt.name || wt.tag ) }
 }
 
+export function smootherStep( signal:ElementaryNode){
+  return el.smooth(el.tau2pole(0.01), signal)
+}
 export class FuncGen implements FunctionGenerator{
    onOff: ElementaryNode | number ;
    level: ElementaryNode | number = 0.75;
@@ -39,15 +42,15 @@ export class FuncGen implements FunctionGenerator{
    table: SampleBuffer;
    seqEnv: ElementaryNode;
 
-  constructor( env: string, unique: boolean = true) {
+  constructor( env: string, unique: boolean = true ) {
     this.table = getSampleDataForWaveTable(env)
     this.nodeKey = unique ? randomID() : env;
     this.env = env
     this.seqEnv = el.const( {key: this.nodeKey, value: 0} )
   }
   public envelope( options : EnvelopeOptions ) : ElementaryNode {
-     console.log( `${options.env} at envelope requested. Available? ${ControlWaves.has(options.env)}`)
     if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
+    if (options.reverse) this.table.reverse()
     Object.assign(this, options)
     let levelSignal = (typeof this.level === "number") ? el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
     let onOffSignal = (typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
@@ -59,7 +62,7 @@ export class FuncGen implements FunctionGenerator{
         },
         el.train(el.const({ value: hz, key: `${this.nodeKey}.hz` })),
         onOffSignal);
-      return ( el.mul( el.sm( this.seqEnv ), levelSignal ) )
+      return ( el.mul( smootherStep( this.seqEnv ), levelSignal ) )
   }
 
   public dispose(){

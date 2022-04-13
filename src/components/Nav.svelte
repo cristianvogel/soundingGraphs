@@ -14,11 +14,24 @@
     import SoundingGraphs from "./GraphicalExtras/SoundingGraphs.svelte";
     import VerticalDots from "./GraphicalExtras/VerticalDots.svelte";
     import { selectedGraphs } from "../lib/stores/graphsViewStores";
-    import { fsmToggle } from "../lib/stores/fsmStoreNew";
+    import { soundToggle } from "../lib/stores/fsmStoreNew";
+    import Slider from '@bulatdashiev/svelte-slider';
+    import { audioEngine, audioStore, speechSynthesis, speechState } from "../lib/stores/audioStores";
+    import { get } from "svelte/store";
+    import { fitClamped } from "../lib/common/dataUtils";
 
-    const simpleSwitch = fsmToggle;
+    let volumeFader = [4]
+    const simpleSwitch = soundToggle;
+    const voicesList = audioEngine
+
     $: sounding = ($simpleSwitch === 'on');
 
+    function changeSpeechVolume(e) {
+        const faderValue = e.detail[0]
+        const engineStore = get(audioEngine)
+        let v = (faderValue >= 1) ? fitClamped( faderValue, 0,10,0,0.3 ) : 0
+        engineStore.setVoiceVolume(v)
+    }
 
 </script>
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
@@ -56,7 +69,6 @@
                 <Icon icon="mdi-book-open-outline" class="m-2 is-size-5" /> Docs
             </a>
             </Hint>
-
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link" style="padding-top: 2px" aria-label="More" media="screen">
                     <Icon icon="mdi-looks" class="m-2 is-size-5"/> More
@@ -95,27 +107,47 @@
                 </div>
             {/if}
             <VerticalDots/>
-            <div class="navbar-item">
-                <InitialiseSound />
-            </div>
-
-<!--            <div class="navbar-item">-->
-<!--                <div class="buttons">-->
-<!--                    <a class="button is-primary">-->
-<!--                        <strong>Sign up</strong>-->
-<!--                    </a>-->
-<!--                    <a class="button is-light">-->
-<!--                        Log in-->
-<!--                    </a>-->
-<!--                </div>-->
-<!--            </div>-->
         </div>
     </div>
 </nav>
+<nav class="navbar is-fixed-bottom navbar2" role="navigation">
+    <div id="navbarFooter" class="navbar-menu" >
+
+        <div class="navbar-brand"  >
+            <div class="navbar-item"><InitialiseSound /> </div>
+            <div class="navbar-item pl-3 pt-0" style="width: 100%;" >
+                Voice:
+                <Slider bind:value={volumeFader} min="0" max="10" on:input={changeSpeechVolume} >
+                    <span aria-label="volume fader" slot="left" class="button is-rounded is-small" style="top: 0.4em">
+                        {volumeFader}
+                    </span>
+                </Slider>
+            </div>
+        </div>
+        </div>
+</nav>
+
+
+
 <style>
+    .navbar2 {
+        color: #0000;
+        padding-bottom: 1em;
+    }
+
+    .navbar2 {
+        background: linear-gradient(90deg,#80ed12,#A5D604,#C7B601,#E39209,#F66C1C,#FE4838,#FB295B,#ED1180,#D504A6,#B601C8,#910AE3,#6B1DF6,#4739FE,#285BFB,#1181ED,#03A6D5);
+    }
+    :root {
+        --track-bg: transparent;
+        --progress-bg: darkgrey;
+        --thumb-bg: transparent;
+    }
+
     .sonify-logo
     {
         height: auto;
         max-width: 4rem;
     }
+
 </style>

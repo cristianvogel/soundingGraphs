@@ -25,7 +25,8 @@ export type EnvelopeOptions = {
   durMS?: number,
   env: string,
   interp?: boolean,
-  level?: ElementaryNode
+  level?: ElementaryNode,
+  reverse?: boolean
 }
 export interface FunctionGenerator {
   onOff: ElementaryNode,
@@ -83,4 +84,10 @@ export type EffectParameters = {
   id?: string,
   feedback?: number,
   options?: { filter?: number }
+}
+
+export type MappedVoice = {
+  index: number,
+  language: string,
+  voice: SpeechSynthesisVoice
 }

@@ -6,17 +6,17 @@ import { el } from "@elemaudio/core";
 import { Sound, Waves } from "../common/globals";
 import { audioStore } from "../stores/audioStores";
 import { store } from "../stateMachinery/engineStateService"; // todo: move to simpler store
-import { speechStore } from "../stores/audioStores";
+import { speechState } from "../stores/audioStores";
 import { get } from "svelte/store";
 import { Speech } from "./speech";
-import { fsmToggle } from "../../lib/stores/fsmStoreNew";
+import { soundToggle } from "../../lib/stores/fsmStoreNew";
 import getCore from "./elemWebRenderer";
 import { GraphScrubSynth } from "./tones";
 import { asSamplesFile } from "./samplers";
 import { FuncGen } from "./control";
 import type { FunctionGenerator } from "../../types/audio";
 import { echo } from "./effects";
-
+import { roundTo } from "@thi.ng/math";
 
 type AudioContextInfo = {
   context: AudioContext,
@@ -29,13 +29,14 @@ export type Engine = {
 }
 
 let core = getCore();
-const simpleSwitch = fsmToggle
-const voiceGuide = new Speech()
+const simpleSwitch = soundToggle
 
 abstract class AudioEngine {
   private static ctx: AudioContext;
+  protected static speechSynthesis: Speech;
   protected constructor(ctx: AudioContext) {
     AudioEngine.ctx = ctx
+    AudioEngine.speechSynthesis = new Speech()
   }
   public static getBaseContextInfo(): AudioContextInfo {
     return  { context: AudioEngine.ctx, status: AudioEngine.ctx.state, sampleRate: AudioEngine.ctx.sampleRate } ;
@@ -68,7 +69,7 @@ abstract class AudioEngine {
 class Elementary extends AudioEngine  {
   private static instance: Elementary;
   masterVolume: number;
-  private actx: AudioContext;
+  private readonly actx: AudioContext;
   private sr: number
   private funcGens: FunctionGenerator [] = new Array()
 
@@ -77,7 +78,7 @@ class Elementary extends AudioEngine  {
     super(baseACTX);
     this.actx = AudioEngine.getBaseContextInfo().context;
     this.masterVolume = 0.5;
-    this.sr = this.actx.sampleRate
+    this.sr = this.actx.sampleRate;
   }
 
   public static getInstanceOfElementary( baseACTX: AudioContext): Elementary {
@@ -151,12 +152,13 @@ class Elementary extends AudioEngine  {
 
   ping( onOff:number = 0.25) {
       this.resume();
-      this.setMasterVolume(0.3);
+      this.setMasterVolume(0.4);
       let pingFreq: number;
       let sounding: boolean
       const unsub = simpleSwitch.subscribe((s)=> sounding = (s === 'on')  );
 
       pingFreq = (sounding) ?  800 : 300
+
       const onOffSignal = el.const( {value: onOff, key: "pingGate" } )
 
       const envL = this.funcGens[0].envelope({
@@ -169,6 +171,7 @@ class Elementary extends AudioEngine  {
         onOff: onOffSignal,
         env: Waves.FOUR_REV,
         durMS: 0.005,
+        reverse: true,
         level: 1 })
 
       let pingL = el.mul (
@@ -186,7 +189,7 @@ class Elementary extends AudioEngine  {
         pingR = echo(
           { signal: el.mul(0.2, pingR),
           timeConstantMS: 123,
-          feedback: 0.4,
+          feedback: 0.45,
           id: 'ping-fx'} )
       }
     this.renderStereo(  pingL, pingR  )
@@ -195,7 +198,8 @@ class Elementary extends AudioEngine  {
   scrubGraphSonification(dataValue:number, dataSource?:string  )  {
 
     const engineState = get(store).state;
-    const { isActive: voiceActive, latestUtterance } = get(speechStore)
+
+    const { isActive: voiceActive, latestUtterance } = get(speechState)
 
     if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
     if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
@@ -209,7 +213,12 @@ class Elementary extends AudioEngine  {
   }
 
   say( text:string) {
-    voiceGuide.speak(text)
+    AudioEngine.speechSynthesis.speak(text)
+  }
+
+  setVoiceVolume( volume: number )
+  {
+    AudioEngine.speechSynthesis.setVolume( roundTo(volume, 0.0001) )
   }
 
   render( sound? ): void  {
@@ -222,7 +231,5 @@ class Elementary extends AudioEngine  {
     const outR = el.mul( right, el.sm( el.const( {key: 'zR' , value: this.masterVolume} ) ) )
     core.render(outL , outR)
   }
-
 }
-
 export default Elementary;

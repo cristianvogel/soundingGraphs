@@ -4,8 +4,9 @@
 	import {
 		audioEngine,
 		audioStore,
-		speechEngine
+		speechSynthesis
 	} from "../lib/stores/audioStores";
+	import { lazyLoad } from '@benten28/svelte-utilities'
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
 	import Elementary from "../lib/audio/audioEngine";
@@ -29,7 +30,7 @@
 
 		// initialise speech
 			const speech:SpeechSynthesis = window.speechSynthesis
-			speechEngine.set(speech)
+			speechSynthesis.set(speech)
 	})
 
 	setContext( 'colour.mapping', colourMapping)
@@ -44,9 +45,9 @@
 	{:else }
 	<div class="modal is-active">
 		<div class="modal-background">
-			<img src='graphics/svg/rainbowWave.svg'/>
+			<img use:lazyLoad={'graphics/svg/rainbowWave.svg'} />
 		</div>
-		<div class="modal-content">
+		<div class="modal-content" style="overflow: visible">
 			<button class="box p-6 has-background-black-bis has-text-centered" aria-label="Click now to Start" on:click={handleModalClick} >
 				<SoundingGraphs size="1"/>
 			</button>
@@ -54,3 +55,7 @@
 	</div>
 
 	{/if}
+
+<style>
+
+</style>

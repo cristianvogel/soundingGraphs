@@ -1,10 +1,9 @@
 <script>
 // Animated Audio Icon
 // adapted from https://codepen.io/joshbader/pen/LpvWZx
+export let isIcon = true;
 </script>
-
 <div class="bars audio"><i></i></div>
-
 <style lang="scss">
     .bars {
         position: relative;
