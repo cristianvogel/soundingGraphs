@@ -38,7 +38,7 @@
         fill: none;
         stroke-linejoin: round;
         stroke-linecap: round;
-        stroke-width: 0.15em;
+        stroke-width: 0.1em;
     }
 
     .selected {

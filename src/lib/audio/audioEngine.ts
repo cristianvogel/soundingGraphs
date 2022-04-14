@@ -16,7 +16,6 @@ import { asSamplesFile } from "./samplers";
 import { FuncGen } from "./control";
 import type { FunctionGenerator } from "../../types/audio";
 import { echo } from "./effects";
-import { roundTo } from "@thi.ng/math";
 
 type AudioContextInfo = {
   context: AudioContext,
@@ -32,9 +31,10 @@ let core = getCore();
 const simpleSwitch = soundToggle
 
 abstract class AudioEngine {
-  private static ctx: AudioContext;
-  protected static speechSynthesis: Speech;
+  protected static ctx: AudioContext;
+  static speechSynthesis: Speech;
   protected constructor(ctx: AudioContext) {
+    if (!ctx) throw new Error('Base AudioContext does not exist 🔇')
     AudioEngine.ctx = ctx
     AudioEngine.speechSynthesis = new Speech()
   }
@@ -55,37 +55,33 @@ abstract class AudioEngine {
       }
     }
   }
-  public static getInstanceOfElementary( baseACTX: AudioContext) { return };
   abstract mount();
   abstract mute();
   protected resume() { this.setAudioContextState('running') };
   abstract ping();
-  protected static masterVolume: number;
   abstract setMasterVolume(volume: number);
 }
 /////////////////////////////////////////////////////////////////////////////////
 
-// todo: bring this instantiation up to Elementary v1.0 allowing for offline renderer option
 class Elementary extends AudioEngine  {
-  private static instance: Elementary;
   masterVolume: number;
   private readonly actx: AudioContext;
   private sr: number
   private funcGens: FunctionGenerator [] = new Array()
+  private static core: Elementary;
 
-  private constructor(baseACTX: AudioContext) {
-    if (!baseACTX) throw new Error('Base AudioContext does not exist!')
+   private constructor(baseACTX: AudioContext) {
     super(baseACTX);
     this.actx = AudioEngine.getBaseContextInfo().context;
     this.masterVolume = 0.5;
     this.sr = this.actx.sampleRate;
   }
 
-  public static getInstanceOfElementary( baseACTX: AudioContext): Elementary {
-    if (!Elementary.instance) {
-      Elementary.instance = new Elementary(baseACTX);
+  public static instantiateCore(baseACTX: AudioContext): Elementary {
+    if (!Elementary.core) {
+      Elementary.core = new Elementary(baseACTX);
     }
-    return Elementary.instance;
+    return Elementary.core;
   }
 
   async mount() {
@@ -216,19 +212,14 @@ class Elementary extends AudioEngine  {
     AudioEngine.speechSynthesis.speak(text)
   }
 
-  setVoiceVolume( volume: number )
-  {
-    AudioEngine.speechSynthesis.setVolume( roundTo(volume, 0.0001) )
-  }
-
   render( sound? ): void  {
-    const outM = el.mul( sound, el.sm( el.const( {key: 'zM' , value: this.masterVolume} ) ) )
+    const outM = el.mul( sound, el.sm( el.const( {key: 'masterM' , value: this.masterVolume} ) ) )
     core.render(outM, outM)
   }
 
   renderStereo( left?, right?) {
-    const outL = el.mul( left, el.sm( el.const( {key: 'zL' , value: this.masterVolume} ) ) )
-    const outR = el.mul( right, el.sm( el.const( {key: 'zR' , value: this.masterVolume} ) ) )
+    const outL = el.mul( left, el.sm( el.const( {key: 'masterL' , value: this.masterVolume} ) ) )
+    const outR = el.mul( right, el.sm( el.const( {key: 'masterR' , value: this.masterVolume} ) ) )
     core.render(outL , outR)
   }
 }

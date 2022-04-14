@@ -1,5 +1,20 @@
 let dataSetsIndex = [
 
+    {
+        id: 'tables2insect-kraghede-1997-2018-2-csv:sheet1:14:1449:text-csv:61125:1640825010748',
+        permanent: true,
+        recentlyAdded: true,
+        metadata: {
+            title: 'Parallel Declines in abundance of insects in Denmark over 22 years',
+            source: 'https://datadryad.org/stash/dataset/doi:10.5061/dryad.gq73493',
+            fields: 14,
+            rows: 1449
+        },
+        imported: 1649669275450,
+        attachments: {
+            data: ()=> import('./insect-kraghede-1997-2018.json')
+        }
+    },
 
     {
         id: ':sample:us-historical-budget-data',

@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import { speechSynthesis, speechState } from "../stores/audioStores";
-import type { MappedVoice } from "../../types/audio";
+import { roundTo } from "@thi.ng/math";
 
 export class Speech {
 
@@ -9,21 +9,9 @@ export class Speech {
   speaking: boolean = false
   private wordCount = 0
   private currentVoice: SpeechSynthesisVoice
-  private utterance: SpeechSynthesisUtterance
-
 
   constructor() {
     // weirdly cannot instantiate SpeechSynthesis in constructor without problems
-  }
-
-  private initSpeechUtterance(inputText: string): SpeechSynthesisUtterance {
-    const utterance = new SpeechSynthesisUtterance(inputText)
-    utterance.onstart = (event) => this.readyToSpeak();
-    utterance.onend = (event) => this.readyToSpeak();
-    utterance.onerror = function(event) {
-      console.error("SpeechSynthesisUtterance.onerror");
-    }
-    return utterance
   }
 
   populateVoiceList() {
@@ -39,55 +27,76 @@ export class Speech {
     //todo: implement voices user selectable list
     if (!get(speechSynthesis)) return
     if (!this.voices) this.populateVoiceList()
+    if (get(speechSynthesis).speaking) this.speaking = true
+    this.utter(inputText);
+  }
 
-    if (get(speechSynthesis).speaking) {
-      console.log("speechSynthesis.speaking");
-      this.speaking = true;
+  private initSpeechUtterance(inputText: string): SpeechSynthesisUtterance {
+    const utterance = new SpeechSynthesisUtterance(inputText)
+    utterance.onend = (event) => this.unblockSpeech();
+    utterance.onerror = function(event) {
+      console.error("SpeechSynthesisUtterance.onerror");
     }
+    return utterance
+  }
 
-    if (!this.speaking && inputText !== "") {
+  private utter(inputText: string) {
+
+    if (!this.speaking && inputText !== "" && this.speechVolume !== 0.0) {
       const utterance = this.initSpeechUtterance(inputText);
-      utterance.text = inputText
-      utterance.voice = this.currentVoice
-      utterance.pitch = 0.8 + (Math.random()*0.2);
-      utterance.rate = 0.9
-      if (utterance.volume !== this.speechVolume) utterance.volume = this.speechVolume
-      this.wordCount++
-      this.updateSpeechStore(inputText)
-      console.log(`Uttering ${inputText} at volume ${this.speechVolume}`)
-      get(speechSynthesis).speak(utterance)
+      utterance.text = inputText;
+      utterance.voice = this.currentVoice;
+      utterance.pitch = 0.8 + (Math.random()*0.2)
+      utterance.rate = 0.9 + (Math.random()*0.2)
+      utterance.volume = this.speechVolume;
+      this.wordCount++;
+    //  console.log(`Uttering ${inputText} at volume ${utterance.volume}`);
+      get(speechSynthesis).speak(utterance);
+      this.updateSpeechStore(inputText);
     }
   }
 
-
-  private readyToSpeak() {
+  private unblockSpeech() {
+    this.speechVolume = get(speechState).volume
     this.speaking = false;
   }
 
-  private updateSpeechStore(inputText: string) {
+  private updateSpeechStore(inputText?: string, speaking?: boolean) {
     speechState.update(store => ({
       ...store,
       latestUtterance: inputText,
       currentVoice: this.currentVoice,
-      wordCount: this.wordCount
+      wordCount: this.wordCount,
+      speaking: this.speaking || speaking,
+      volume: this.speechVolume
     }));
   }
 
-  getVoicesList():Map<string,MappedVoice>{
-    let voicesMap = new Map();
-    this.voices.map( ( v, i)  => {
-        voicesMap.set( v.name, { index: i, language: v.lang, voice: v } );
-      }
-     )
-    return voicesMap
-  }
-
-  setCurrentVoice( name:string){
-    const vox:SpeechSynthesisVoice = this.getVoicesList().get(name).voice
-    this.currentVoice = vox ? vox : this.currentVoice
-  }
-
   setVolume( newVolume?:number ){
-    if ( newVolume !== this.speechVolume  ) this.speechVolume = newVolume
+    // Speech API is buggy, this needs rounding to work
+    const v = roundTo( newVolume || this.speechVolume, 0.1 )
+    //console.log( `Set voice volume to ${v}`)
+    this.speechVolume = v
+    this.updateSpeechStore();
   }
+
+  muteVoice() {
+    this.speechVolume = 0.0;
+  }
+
+  // todo:
+  // getVoicesList():Map<string,MappedVoice>{
+  //   let voicesMap = new Map();
+  //   this.voices.map( ( v, i)  => {
+  //       voicesMap.set( v.name, { index: i, language: v.lang, voice: v } );
+  //     }
+  //    )
+  //   return voicesMap
+  // }
+  //
+  // setCurrentVoice( name:string){
+  //   const vox:SpeechSynthesisVoice = this.getVoicesList().get(name).voice
+  //   this.currentVoice = vox ? vox : this.currentVoice
+  // }
+
 }

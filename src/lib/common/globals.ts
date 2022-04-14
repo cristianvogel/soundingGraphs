@@ -1,5 +1,7 @@
 // Global static consts used around the code
 
+import { expoOut } from "svelte/easing";
+
 export const TEXT_CHAR_LIMIT:number = 24
 export const EPSILON:number = 1.0e-4
 
@@ -27,5 +29,8 @@ export enum Waves {
     REV_EXP = 'REV_EXP',
 }
 
-
+export enum GraphScrubKeys {
+    ROW = 'Row',
+    POINT = 'Value'
+}
 

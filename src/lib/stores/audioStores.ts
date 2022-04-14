@@ -9,11 +9,13 @@ type AudioStore = {
 }
 
 type SpeechState = {
+  volume: number;
   errorCode?: SpeechSynthesisErrorCode,
   wordCount: number,
   isActive: boolean,
   latestUtterance: string,
-  currentVoice: SpeechSynthesisVoice
+  currentVoice: SpeechSynthesisVoice,
+  speaking: boolean
 }
 
 //audio
@@ -29,5 +31,12 @@ export const audioStore: Writable<AudioStore> = writable(
 //speech
 export const speechSynthesis: Writable<SpeechSynthesis> = writable()
 export const speechState: Writable<SpeechState> = writable(
-  { wordCount: 0, isActive: true, latestUtterance: '', currentVoice: undefined }
+  {
+    wordCount: 0,
+    isActive: true,
+    latestUtterance: '',
+    currentVoice: undefined,
+    speaking: false,
+    volume: 0.3
+  }
 )

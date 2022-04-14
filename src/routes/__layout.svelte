@@ -9,9 +9,9 @@
 	import { lazyLoad } from '@benten28/svelte-utilities'
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
-	import Elementary from "../lib/audio/audioEngine";
 	import { ColourMapping } from "../lib/graphics/colourMapping";
 	import SoundingGraphs from "../components/GraphicalExtras/SoundingGraphs.svelte";
+	import  Elementary from "../lib/audio/audioEngine";
 
 	const colourMapping:ColourMapping = new ColourMapping();
 	$: modalClicked = false;
@@ -23,8 +23,8 @@
 			const context:AudioContext = new (window["AudioContext"])()
 			audioStore.update(store => ({ ...store, context, contextState: 'suspended' }))
 			console.log('Assigned audio context for: '+ context.sampleRate + ' SR ')
-			audioEngine.set( Elementary.getInstanceOfElementary(context))
-			const engine: Elementary = get(audioEngine)
+			const engine: Elementary = Elementary.instantiateCore(context)
+			audioEngine.set( engine )
 			await engine.mount()
 		}
 

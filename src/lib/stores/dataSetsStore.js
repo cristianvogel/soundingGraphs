@@ -24,7 +24,8 @@ const dataSetsStore = (initial) => {
         const columnsWithHeaders = headedColumnsFrom( 'name', fields, columnData)
         // const normalized = structuredData.normalized;
         const asArqueroTable = from(columnsWithHeaders)
-        asArqueroTable.print()
+        // debug
+        // asArqueroTable.print()
 
         store.push({
             position,

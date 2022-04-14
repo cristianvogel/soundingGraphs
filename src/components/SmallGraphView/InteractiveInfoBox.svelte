@@ -8,8 +8,16 @@
     import GraphQuadTreeSearch from './QuadTree.svelte';
     import OvalMark from "../GraphicalExtras/OvalMark.svelte";
     import { fade } from "svelte/transition";
+    import { soundToggle } from "$lib/stores/fsmStoreNew.ts";
+    import { GraphScrubKeys } from "$lib/common/globals.ts";
+    import Speaker from "../GraphicalExtras/Speaker.svelte";
+    import Icon from "@iconify/svelte";
+    import { roundTo } from "@thi.ng/math";
 
     const { data, width, yScale, config } = getContext('LayerCake')
+
+    const simpleSwitch = soundToggle;
+    $: sounding = ($simpleSwitch === 'on');
 
     export let header;
     export let tint = '#111';
@@ -21,7 +29,9 @@
     export let formatTitle = d => d;
 
     /** @type {Function} [formatValue=d => isNaN(+d) ? d : commas(d)] - A function to format the value. */
-    export let formatValue = d => isNaN(+d) ? d : commas(d);
+    export let formatValueWithCommas = d => isNaN(+d) ? d : commas(d);
+
+    export let formatValue = d => isNaN(+d) ? d : d.toPrecision(4);
 
     /** @type {Function} [formatKey=d => titleCase(d)] - A function to format the series name. */
     export let formatKey = d => titleCase(d);
@@ -37,16 +47,16 @@
     const w2 = w / 2;
 
     /* --------------------------------------------
-     * Sort the keys by the highest value
+     *
      */
     function sortResult(result) {
         if (Object.keys(result).length === 0) return [];
         const rows = Object.keys(result).filter(d => d !== $config.x).map(key => {
             return {
-                key,
+                key: GraphScrubKeys[ (key === 'x') ? 'ROW' : 'POINT' ],
                 value: result[key]
             };
-        }).sort((a, b) => b.value - a.value);
+        });
         return rows;
     }
 
@@ -88,8 +98,29 @@
             <div class="has-text-left has-text-black-bis has-text-weight-semibold is-size-6">
                 {formatTitle(header)}</div>
             {#each foundSorted as row}
-                {@const emitAndRead = ()=> {if (row.key === 'y') emitScrubData(row.value); return (row.key) } }
-                <div class="row"><span class="key">Axis: {formatKey(emitAndRead())}∙</span> Value: {formatValue(row.value)}</div>
+                {@const
+                   emitAndRead = ()=>{
+                    if (row.key === GraphScrubKeys.POINT) emitScrubData(row.value);
+                    return (row.key) }
+                }
+                <div class="row">
+                    <span class="key">{formatKey(emitAndRead())}∙</span>
+                        {#if (sounding && (row.key === GraphScrubKeys.POINT))}
+                            <span >
+                                <Icon icon="mdi:volume-source"
+                                      height="2em"
+                                      inline="true"
+                                      hFlip="false"
+                                      class="is-pulled-right"
+                                      style="transform: translateY(15%)">
+                                </Icon>
+                            </span>
+                        {/if}
+                    <span class={(row.key === GraphScrubKeys.POINT) ? 'is-size-4': ''}>
+                        {formatValue(row.value)}
+                    </span>
+
+                </div>
             {/each}
             <nav class="level">
                 <OvalMark {tint} _class="level-left"/>

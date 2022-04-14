@@ -16,9 +16,9 @@
     import { selectedGraphs } from "../lib/stores/graphsViewStores";
     import { soundToggle } from "../lib/stores/fsmStoreNew";
     import Slider from '@bulatdashiev/svelte-slider';
-    import { audioEngine, audioStore, speechSynthesis, speechState } from "../lib/stores/audioStores";
-    import { get } from "svelte/store";
+    import { audioEngine, speechState } from "../lib/stores/audioStores";
     import { fitClamped } from "../lib/common/dataUtils";
+    import AudioEngine from "../lib/audio/audioEngine";
 
     let volumeFader = [4]
     const simpleSwitch = soundToggle;
@@ -28,9 +28,10 @@
 
     function changeSpeechVolume(e) {
         const faderValue = e.detail[0]
-        const engineStore = get(audioEngine)
-        let v = (faderValue >= 1) ? fitClamped( faderValue, 0,10,0,0.3 ) : 0
-        engineStore.setVoiceVolume(v)
+        if (faderValue === 0){ AudioEngine.speechSynthesis.muteVoice(); return}
+        let v = (faderValue >= 1) ? fitClamped( faderValue, 0,10,0.0,0.4 ) : 0
+        speechState.update( (store => ({ ...store, volume: v })))
+        AudioEngine.speechSynthesis.setVolume( v )
     }
 
 </script>

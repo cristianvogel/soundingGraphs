@@ -23,7 +23,7 @@
     export let header = '';
 
     /** @type {String} [x='x'] – The dimension to search across when moving the mouse left and right. */
-    export let x = 'x';
+    export let x = 'y';
 
     /** @type {String} [y='y'] – The dimension to search across when moving the mouse up and down. */
     export let y = 'y';
@@ -83,7 +83,7 @@
     {/if}
 </div>
 <slot
-        x={xGetter(found)  || 0}
+        x={ 0}
         y={yGetter(found) || 0}
         {found}
         {visible}
