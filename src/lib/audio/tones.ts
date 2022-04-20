@@ -7,8 +7,8 @@ import { clamp } from "../common/dataUtils";
 import { FuncGen } from "./control";
 import { Waves } from "../common/globals";
 
-
-const func = new FuncGen( Waves.EXP )
+const envelope = Waves.EXP
+const funcGens = [new FuncGen( envelope ), new FuncGen( envelope )]
 let deltaMem:number[] = [0,0];
 let ping: SignalOrNumber;
 export function GraphScrubSynth(
@@ -17,14 +17,16 @@ export function GraphScrubSynth(
     gate = 1,
     id = "scrubSynth"
   }: SynthCR): SignalOrNumber {
-      const onOff = el.const( {value: Math.round(Math.abs(deltaMem[1]) - Math.abs(deltaMem[0])), key: `graphFq`} )
+      const deltaTest = (freq === deltaMem[1])
+      const onOff = el.const( {value: deltaTest ? 0 : gate, key: `${id}-gate`} )
       ping  = el.mul(
-                    func.envelope( {onOff: onOff, durMS: 25, level: 0.15, env: Waves.EXP} ),
-                    el.cycle( el.add( el.const( { value: clamp(freq, 100, 6000), key: 'scrubFreq'}) , 113 ) )
+                    funcGens[deltaTest ? 0 : 1].envelope( {onOff: onOff, durMS: 25, level: 0.15, env: envelope} ),
+                    el.cycle( el.add( el.const( { value: clamp(freq, 100, 6000), key: `${id}-fq`}) , 113 ) )
                 )
-
     deltaMem[1] = deltaMem[0]
-    deltaMem[0] = freq;
+    deltaMem[0] = freq
+
+  //console.log(deltaMem)
       return (
         echo( {
           signal: ping,

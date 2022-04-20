@@ -213,13 +213,13 @@ class Elementary extends AudioEngine  {
 
   render( sound? ): void  {
     const outM = el.mul( sound, el.sm( el.const( {key: 'masterM' , value: this.masterVolume} ) ) )
-   this.render(outM)
+    core.render(outM)
   }
 
   renderStereo( left?, right?) {
     const outL = el.mul( left, el.sm( el.const( {key: 'masterL' , value: this.masterVolume} ) ) )
     const outR = el.mul( right, el.sm( el.const( {key: 'masterR' , value: this.masterVolume} ) ) )
-    console.log(core.render(outL , outR))
+    core.render(outL , outR)
   }
 }
 export default Elementary;
