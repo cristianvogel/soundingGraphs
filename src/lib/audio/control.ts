@@ -1,4 +1,4 @@
-import { el } from "@elemaudio/core";
+import { el, resolve } from "@elemaudio/core";
 import type { ElementaryNode, EnvelopeOptions, FunctionGenerator, SampleBuffer } from "../../types/audio";
 import type { MonoWaveTable } from "../../types/audio";
 import { msToHz, sampToMs } from "./helpers";
@@ -44,7 +44,7 @@ export class FuncGen implements FunctionGenerator{
 
   constructor( env: string, unique: boolean = true ) {
     this.table = getSampleDataForWaveTable(env)
-    this.nodeKey = unique ? randomID() : env;
+    this.nodeKey = unique ? Date.now().toPrecision(4) : 'funcGen';
     this.env = env
     this.seqEnv = el.const( {key: this.nodeKey, value: 0} )
   }
@@ -52,15 +52,15 @@ export class FuncGen implements FunctionGenerator{
     if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
     if (options.reverse) this.table.reverse()
     Object.assign(this, options)
-    let levelSignal = (typeof this.level === "number") ? el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
-    let onOffSignal = (typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
+    let levelSignal = resolve(this.level) //el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
+    let onOffSignal = resolve(this.onOff) //(typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
     let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (48000 / (this.table.length || 512))
       this.seqEnv = el.seq2({
           seq: Array.from(this.table),
           hold: true,
           loop: false
         },
-        el.train(el.const({ value: hz, key: `${this.nodeKey}.hz` })),
+        el.train(resolve(hz)),
         onOffSignal);
       return ( el.mul( smootherStep( this.seqEnv ), levelSignal ) )
   }

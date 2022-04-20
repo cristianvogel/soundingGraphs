@@ -31,7 +31,7 @@
     /** @type {Function} [formatValue=d => isNaN(+d) ? d : commas(d)] - A function to format the value. */
     export let formatValueWithCommas = d => isNaN(+d) ? d : commas(d);
 
-    export let formatValue = d => isNaN(+d) ? d : d.toPrecision(4);
+    export let formatValue = d => isNaN(+d) ? d : roundTo(d, 0.01).toPrecision(4);
 
     /** @type {Function} [formatKey=d => titleCase(d)] - A function to format the series name. */
     export let formatKey = d => titleCase(d);
