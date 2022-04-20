@@ -123,9 +123,11 @@
         <div class="navbar-brand"  >
             <div class="navbar-item"><InitialiseSound /> </div>
             <div class="navbar-item pl-3 pt-0" style="width: 100%;" >
-                Voice:
+                <Hint text='Speech Volume' auto="true"  >
+                <Icon icon="mdi:talk" class="m-2 pt-3 pr-3 is-size-1" />
+                </Hint>
                 <Slider bind:value={volumeFader} min="0" max="5" on:input={changeSpeechVolume} >
-                    <span aria-label="volume fader" slot="left" class="button is-rounded is-small" style="top: 0.4em">
+                    <span aria-label="speech volume moves left to right" slot="left" class="button is-rounded is-small" style="top: 0.4em">
                         {volumeFader}
                     </span>
                 </Slider>

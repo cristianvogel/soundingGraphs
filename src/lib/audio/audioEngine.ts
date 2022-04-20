@@ -151,6 +151,7 @@ class Elementary extends AudioEngine  {
       this.setMasterVolume(0.4);
       let pingFreq: number;
       let sounding: boolean
+      // subscription does return an unused unsubscribe... dont know how to use it yet
       const unsub = simpleSwitch.subscribe((s)=> sounding = (s === 'on')  );
 
       pingFreq = (sounding) ?  800 : 300
@@ -160,15 +161,15 @@ class Elementary extends AudioEngine  {
       const envL = this.funcGens[0].envelope({
         onOff: onOffSignal,
         env: Waves.FAST_BOW,
-        durMS: 0.01,
+        durMS: 0.1,
         level: 0.2 })
 
       const envR = this.funcGens[1].envelope({
         onOff: onOffSignal,
         env: Waves.FOUR_REV,
-        durMS: 0.005,
+        durMS: 0.05,
         reverse: true,
-        level: 1 })
+        level: 0.75 })
 
       let pingL = el.mul (
                         envL,
@@ -183,7 +184,7 @@ class Elementary extends AudioEngine  {
       )
       if (!sounding) {
         pingR = echo(
-          { signal: el.mul(0.2, pingR),
+          { signal: el.mul(0.8, pingR),
           timeConstantMS: 123,
           feedback: 0.45,
           id: 'ping-fx'} )
@@ -214,13 +215,13 @@ class Elementary extends AudioEngine  {
 
   render( sound? ): void  {
     const outM = el.mul( sound, el.sm( el.const( {key: 'masterM' , value: this.masterVolume} ) ) )
-    core.render(outM, outM)
+   this.render(outM)
   }
 
   renderStereo( left?, right?) {
     const outL = el.mul( left, el.sm( el.const( {key: 'masterL' , value: this.masterVolume} ) ) )
     const outR = el.mul( right, el.sm( el.const( {key: 'masterR' , value: this.masterVolume} ) ) )
-    core.render(outL , outR)
+    console.log(core.render(outL , outR))
   }
 }
 export default Elementary;
