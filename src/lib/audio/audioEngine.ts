@@ -195,9 +195,7 @@ class Elementary extends AudioEngine  {
   scrubGraphSonification(dataValue:number, dataSource?:string  )  {
 
     const engineState = get(store).state;
-
     const { isActive: voiceActive, latestUtterance } = get(speechState)
-
     if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
     if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
     if (engineState===(Sound.PAUSED || Sound.UNMOUNTED)) return
