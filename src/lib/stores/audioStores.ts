@@ -37,6 +37,6 @@ export const speechState: Writable<SpeechState> = writable(
     latestUtterance: '',
     currentVoice: undefined,
     speaking: false,
-    volume: 0.3
+    volume: 0
   }
 )

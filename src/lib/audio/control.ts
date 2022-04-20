@@ -1,9 +1,11 @@
-import { el, resolve } from "@elemaudio/core";
-import type { ElementaryNode, EnvelopeOptions, FunctionGenerator, SampleBuffer } from "../../types/audio";
+import { createNode, el, NodeRepr_t, resolve } from "@elemaudio/core";
+import type { SignalOrNumber, EnvelopeOptions, FunctionGenerator, SampleBuffer } from "../../types/audio";
 import type { MonoWaveTable } from "../../types/audio";
 import { msToHz, sampToMs } from "./helpers";
 import { randomID } from "../common/dataUtils";
 import { ComputedWaveTables } from "../../../static/waves/computedWaveTables";
+import { DEFAULT_TABLE_LENGTH } from "../common/globals";
+import AudioEngine from "./audioEngine";
 
 export const ControlWaves: Map<string, MonoWaveTable> = ComputedWaveTables
 
@@ -30,47 +32,77 @@ export function removeControlWave( wt: MonoWaveTable ) {
   if (ControlWaves.has(wt.name || wt.tag)) { ControlWaves.delete( wt.name || wt.tag ) }
 }
 
-export function smootherStep( signal:ElementaryNode){
+export function smootherStep( signal:SignalOrNumber){
   return el.smooth(el.tau2pole(0.01), signal)
 }
 export class FuncGen implements FunctionGenerator{
-   onOff: ElementaryNode | number ;
-   level: ElementaryNode | number = 0.75;
+   onOff: SignalOrNumber  ;
+   level: SignalOrNumber;
    durMS: number;
    env: string
    nodeKey: string
    table: SampleBuffer;
-   seqEnv: ElementaryNode;
+   seqEnv: SignalOrNumber;
 
   constructor( env: string, unique: boolean = true ) {
     this.table = getSampleDataForWaveTable(env)
     this.nodeKey = unique ? Date.now().toPrecision(4) : 'funcGen';
     this.env = env
-    this.seqEnv = el.const( {key: this.nodeKey, value: 0} )
-  }
-  public envelope( options : EnvelopeOptions ) : ElementaryNode {
-    if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
-    if (options.reverse) this.table.reverse()
-    Object.assign(this, options)
-    let levelSignal = resolve(this.level) //el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
-    let onOffSignal = resolve(this.onOff) //(typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
-    let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (48000 / (this.table.length || 512))
-      this.seqEnv = el.seq2({
-          seq: Array.from(this.table),
-          hold: true,
-          loop: false
-        },
-        el.train(resolve(hz)),
-        onOffSignal);
-      return ( el.mul( smootherStep( this.seqEnv ), levelSignal ) )
   }
 
-  public dispose(){
-    console.log( 'disposing?')
-    this.table = null
-    this.env = null
-    this.seqEnv = null
-    this.nodeKey = null
+   private compositeFunctionGenerator( {props, context, children}): NodeRepr_t {
+     let levelSignal = resolve(props.level)
+     let onOffSignal = resolve(props.onOff)
+     const seqEnv = el.seq2({
+               seq: Array.from(props.table),
+               hold: true,
+               loop: false
+             },
+             el.train(resolve(props.hz)),
+             onOffSignal);
+    return resolve(
+      el.mul( smootherStep( seqEnv ), levelSignal )
+    )
   }
+
+
+  _envelope(props: Record<string, unknown>){
+    return createNode(this.compositeFunctionGenerator, props, [])
+  }
+
+  envelope( options: EnvelopeOptions): SignalOrNumber {
+      if (this.env !== options.env) {
+        this.table = getSampleDataForWaveTable( options.env ) || this.table
+      }
+      if (options.reverse) this.table.reverse()
+      Object.assign(this, options)
+      return (
+        this._envelope({
+            level: this.level,
+            onOff: this.onOff,
+            table: this.table,
+            hz: msToHz(this.durMS)
+        })
+      )
+  }
+
+  // public envelope( options : EnvelopeOptions ) : ElementaryNode {
+  //   if (this.env !== options.env) {this.table = getSampleDataForWaveTable( options.env ) || this.table}
+  //   if (options.reverse) this.table.reverse()
+  //   Object.assign(this, options)
+  //   let levelSignal = resolve(this.level) //el.const( {key: `${this.nodeKey}.level`, value: this.level}) : this.level;
+  //   let onOffSignal = resolve(this.onOff) //(typeof this.onOff === "number") ? el.const({ key: `${this.nodeKey}.onOff`, value: this.onOff }) : this.onOff;
+  //   let hz = msToHz(this.durMS * defaultRateFor(this.env)) * (AudioEngine.getBaseContextInfo().sampleRate / (this.table.length || DEFAULT_TABLE_LENGTH))
+  //   // this.seqEnv = el.sample( {key: this.nodeKey, data: this.table, channel: 0, mode: 'trigger'}, onOffSignal, 1)
+  //     this.seqEnv = el.seq2({
+  //         seq: Array.from(this.table),
+  //         hold: true,
+  //         loop: false
+  //       },
+  //       el.train(resolve(hz)),
+  //       onOffSignal);
+  //     return ( el.mul( smootherStep( this.seqEnv ), levelSignal ) )
+  // }
+
 }
 

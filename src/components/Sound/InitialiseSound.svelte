@@ -3,6 +3,7 @@
   import { audioEngine, audioStore } from "../../lib/stores/audioStores";
   import { soundToggle } from "../../lib/stores/fsmStoreNew";
   import { fastSin } from "@thi.ng/math";
+  import AudioEngine from "../../lib/audio/audioEngine";
 
   const simpleSwitch = soundToggle;
   let size ;
@@ -12,6 +13,7 @@
   $: engine = audioEngine;
 
   function handleClick(e) {
+
       if (e.type === 'mouseup' ) {
         simpleSwitch.toggle();
         if ($simpleSwitch === 'off') mute()

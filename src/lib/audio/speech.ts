@@ -1,6 +1,8 @@
 import { get } from "svelte/store";
 import { speechSynthesis, speechState } from "../stores/audioStores";
-import { roundTo } from "@thi.ng/math";
+import { EPSILON } from "../common/globals";
+
+const _ = null
 
 export class Speech {
 
@@ -41,16 +43,16 @@ export class Speech {
   }
 
   private utter(inputText: string) {
-
-    if (!this.speaking && inputText !== "" && this.speechVolume !== 0.0) {
+    this.setVolume()
+    if ((!this.speaking) && (inputText !== "") && (this.speechVolume > EPSILON)) {
       const utterance = this.initSpeechUtterance(inputText);
       utterance.text = inputText;
       utterance.voice = this.currentVoice;
       utterance.pitch = 0.8 + (Math.random()*0.2)
       utterance.rate = 0.9 + (Math.random()*0.2)
-      utterance.volume = this.speechVolume;
+      utterance.volume = get(speechState).volume;
       this.wordCount++;
-    //  console.log(`Uttering ${inputText} at volume ${utterance.volume}`);
+      console.log(`Uttering ${inputText} at volume ${utterance.volume}`);
       get(speechSynthesis).speak(utterance);
       this.updateSpeechStore(inputText);
     }
@@ -61,27 +63,28 @@ export class Speech {
     this.speaking = false;
   }
 
-  private updateSpeechStore(inputText?: string, speaking?: boolean) {
+  private updateSpeechStore(inputText?: string, speaking?: boolean, volume?: 0) {
     speechState.update(store => ({
       ...store,
       latestUtterance: inputText,
       currentVoice: this.currentVoice,
       wordCount: this.wordCount,
       speaking: this.speaking || speaking,
-      volume: this.speechVolume
+      volume: volume || this.speechVolume
     }));
   }
 
   setVolume( newVolume?:number ){
     // Speech API is buggy, this needs rounding to work
-    const v = roundTo( newVolume || this.speechVolume, 0.1 )
+    const v =  ( newVolume || get(speechState).volume || 0)
     //console.log( `Set voice volume to ${v}`)
-    this.speechVolume = v
+    this.speechVolume = Number( v.toPrecision(2))
     this.updateSpeechStore();
   }
 
   muteVoice() {
-    this.speechVolume = 0.0;
+    this.speechVolume = 0;
+    this.updateSpeechStore();
   }
 
   // todo:

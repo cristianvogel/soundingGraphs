@@ -1,12 +1,12 @@
 import { NodeRepr_t } from "@elemaudio/core";
 
-export type ElementaryNode = number | NodeRepr_t;
+export type SignalOrNumber = number | NodeRepr_t;
 
 export type SynthSR = {
-  freq: ElementaryNode;
-  gate: ElementaryNode;
+  freq: SignalOrNumber;
+  gate: SignalOrNumber;
   id?: string;
-  options?: { gain?: ElementaryNode }
+  options?: { gain?: SignalOrNumber }
 }
 
 export type SynthCR = {
@@ -21,20 +21,20 @@ export type SampleBuffer = Float32Array;
 export type FunctionExpression = { expression: function }
 
 export type EnvelopeOptions = {
-  onOff: ElementaryNode,
+  onOff: SignalOrNumber,
   durMS?: number,
   env: string,
   interp?: boolean,
-  level?: ElementaryNode,
+  level?: SignalOrNumber,
   reverse?: boolean
 }
 export interface FunctionGenerator {
-  onOff: ElementaryNode,
+  onOff: SignalOrNumber,
   durMS?: number,
   env?: string,
   interp?: boolean,
-  level?: ElementaryNode,
-  envelope: ( EnvelopeOptions ) => ElementaryNode
+  level?: SignalOrNumber,
+  envelope: ( EnvelopeOptions ) => SignalOrNumber
 }
 
 export type AudioFileName = {
@@ -79,7 +79,7 @@ export type NoiseStreamOptions = {
 }
 
 export type EffectParameters = {
-  signal: ElementaryNode,
+  signal: SignalOrNumber,
   timeConstantMS: number,
   id?: string,
   feedback?: number,

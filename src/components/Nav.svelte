@@ -19,8 +19,9 @@
     import { audioEngine, speechState } from "../lib/stores/audioStores";
     import { fitClamped } from "../lib/common/dataUtils";
     import AudioEngine from "../lib/audio/audioEngine";
+    import { onMount } from "svelte";
 
-    let volumeFader = [4]
+    let volumeFader: number[] = [0]
     const simpleSwitch = soundToggle;
     const voicesList = audioEngine
 
@@ -28,11 +29,16 @@
 
     function changeSpeechVolume(e) {
         const faderValue = e.detail[0]
-        if (faderValue === 0){ AudioEngine.speechSynthesis.muteVoice(); return}
-        let v = (faderValue >= 1) ? fitClamped( faderValue, 0,10,0.0,0.4 ) : 0
+        if (faderValue === 0) { AudioEngine.speechSynthesis.muteVoice() }
+        let v = (faderValue >= 1) ? fitClamped( faderValue, 0,5,0,0.4 ) : 0
         speechState.update( (store => ({ ...store, volume: v })))
         AudioEngine.speechSynthesis.setVolume( v )
     }
+
+    onMount(()=> {
+        speechState.update( (store => ({ ...store, volume: 0 })))
+    }
+    )
 
 </script>
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
@@ -118,7 +124,7 @@
             <div class="navbar-item"><InitialiseSound /> </div>
             <div class="navbar-item pl-3 pt-0" style="width: 100%;" >
                 Voice:
-                <Slider bind:value={volumeFader} min="0" max="10" on:input={changeSpeechVolume} >
+                <Slider bind:value={volumeFader} min="0" max="5" on:input={changeSpeechVolume} >
                     <span aria-label="volume fader" slot="left" class="button is-rounded is-small" style="top: 0.4em">
                         {volumeFader}
                     </span>

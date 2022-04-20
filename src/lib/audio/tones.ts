@@ -2,7 +2,7 @@
 
 import { el } from "@elemaudio/core";
 import { echo } from "./effects";
-import type { ElementaryNode, SynthCR } from "../../types/audio";
+import type { SignalOrNumber, SynthCR } from "../../types/audio";
 import { clamp } from "../common/dataUtils";
 import { FuncGen } from "./control";
 import { Waves } from "../common/globals";
@@ -10,13 +10,13 @@ import { Waves } from "../common/globals";
 
 const func = new FuncGen( Waves.EXP )
 let delta = 0;
-let ping: ElementaryNode;
+let ping: SignalOrNumber;
 export function GraphScrubSynth(
   {
     freq = 0,
     gate = 1,
     id = "scrubSynth"
-  }: SynthCR): ElementaryNode {
+  }: SynthCR): SignalOrNumber {
       const onOff = el.const( {value: delta === freq ? 0 : gate, key: 'fq.changed'} )
       const absDerivative = clamp(Math.abs( freq - delta ), 100, 500)
       ping  = el.mul(
