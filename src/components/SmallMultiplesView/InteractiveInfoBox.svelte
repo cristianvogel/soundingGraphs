@@ -10,7 +10,6 @@
     import { fade } from "svelte/transition";
     import { soundToggle } from "$lib/stores/fsmStoreNew.ts";
     import { GraphScrubKeys } from "$lib/common/globals.ts";
-    import Speaker from "../GraphicalExtras/Speaker.svelte";
     import Icon from "@iconify/svelte";
     import { roundTo } from "@thi.ng/math";
 
@@ -49,6 +48,7 @@
     /* --------------------------------------------
      *
      */
+
     function sortResult(result) {
         if (Object.keys(result).length === 0) return [];
         const rows = Object.keys(result).filter(d => d !== $config.x).map(key => {
@@ -75,11 +75,11 @@
 
 <GraphQuadTreeSearch
         on:smallGraph.clicked
-        dataset={dataset || $data}
+        dataset={$data}
         {header}
         {tableTitle}
         {tint}
-        y='x'
+        y='y'
         let:x
         let:y
         let:visible
@@ -117,7 +117,8 @@
                             </span>
                         {/if}
                     <span class={(row.key === GraphScrubKeys.POINT) ? 'is-size-4': ''}>
-                        {formatValue(row.value)}
+                        {row.value}
+                        <!--{formatValue(row.value)}-->
                     </span>
 
                 </div>
@@ -131,11 +132,6 @@
 </GraphQuadTreeSearch>
 
 <style>
-    .circleMark {
-        border-bottom:3em solid;
-        border-radius: 1.5em;
-        border-right:3em solid transparent;
-    }
 
     .tooltip {
         position: absolute;

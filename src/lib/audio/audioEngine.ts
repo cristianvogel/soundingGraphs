@@ -176,7 +176,6 @@ class Elementary extends AudioEngine  {
                         el.cycle(el.const({value: (Date.now() % 24) + 3, key: 'pingLmod'})),
                         el.cycle(el.const({value: pingFreq, key: 'pingL'}))
         )
-
       let pingR = el.mul (
                           envR,
                           el.cycle(el.const({value: (Date.now() % 12) + 3, key: 'pingRmod'})),
@@ -197,7 +196,7 @@ class Elementary extends AudioEngine  {
     const engineState = get(store).state;
     const { isActive: voiceActive, latestUtterance } = get(speechState)
     if ( voiceActive && (latestUtterance !== dataSource) ) this.say(dataSource)
-    if (typeof dataValue !== 'number' ) { console.log( 'error in data' ); return }
+    if (typeof dataValue !== 'number' ) { console.log( 'non-numeric data' ); return }
     if (engineState===(Sound.PAUSED || Sound.UNMOUNTED)) return
     const synth = GraphScrubSynth( {freq: dataValue, gate: 1} )
     this.render(synth)

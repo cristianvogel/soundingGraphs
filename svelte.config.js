@@ -16,7 +16,15 @@ const config = {
 					}
 				}
 			}
-		}
+		},
+		// prerender: {
+		// 	concurrency: 1,
+		// 	crawl: true,
+		// 	default: true,
+		// 	enabled: true,
+		// 	entries: ['*'],
+		// 	onError: 'fail'
+		// },
 	},
 
 	preprocess: [

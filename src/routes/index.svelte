@@ -4,7 +4,7 @@
 </svelte:head>
 <script lang="ts">
     import MainOverview from "../components/DataSetOverview/MainOverview.svelte";
-    import { audioEngine, audioStore } from "$lib/stores/audioStores.ts";
+    import { audioEngine } from "$lib/stores/audioStores.ts";
     import { Writable } from "svelte/store";
     import type Elementary from "../lib/audio/audioEngine";
     import { soundToggle } from "../lib/stores/fsmStoreNew";
@@ -18,8 +18,7 @@
         if (!sounding) return;
         $engine.scrubGraphSonification(e.detail.value, e.detail.label)
     }
-
 </script>
-{#if $audioStore.elementaryReady }
+
     <MainOverview on:smallGraph.scrubbed={handleScrub}/>
-{/if}
+

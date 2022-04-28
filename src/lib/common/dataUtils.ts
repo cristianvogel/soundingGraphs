@@ -1,8 +1,9 @@
 import { op, table} from 'arquero';
 import { nanoid } from 'nanoid';
-import { fitClamped as _fitClamped, norm as _norm, fit01} from "@thi.ng/math/fit";
+import { fitClamped as _fitClamped, norm as _norm } from "@thi.ng/math/fit";
 import { roundEps } from "@thi.ng/math";
 import { EPSILON } from "./globals";
+import type { Point2D, ColumnNamesAndData } from "../../types/non-audio";
 
 /**
  * https://observablehq.com/@uwdata/arquero-cookbook#normalize_column_names
@@ -22,14 +23,14 @@ export function norm ( n:number, inMin:number, inMax:number) {
 }
 
 export function normalizeText( text ) {
-    return normalizeColName( text )
+    return conformColumnName( text )
 }
 
 export function randomID() {
     return nanoid(8)
 }
 
-function normalizeColName(name) {
+function conformColumnName(name) {
     if (!(name)) return
     return name.toUpperCase()            // map to lower case
         .replace(/[%#$£()\'\"]/g, '')      // remove unwanted characters
@@ -48,7 +49,7 @@ export function rowCount( dataColumns  ){
     return  arqueroTable.numRows()
 }
 
-export function toFloat( v ) {
+export function toFloat( v:string ) {
     return op.parse_float(v)
 }
 /**
@@ -63,14 +64,15 @@ export function transposeRowsToColumns( m = [] ) { return m[0].map((x,i) => m.ma
  * @param metaKey a Key to use as header , read from
  * @param metaData an object which should contain some data for prop defined as metaKey
  * @param columnData this data array will be the value of the metaKey prop
- * @returns {{}} remapped object  eg: { Hour: [ 0, 1, 2 ], DOF: [ 89, 97, 69 ], NYPD: [ 767, 524, 355 ] }
+ * @returns {{}} ColumnNamesAndData  eg: { Hour: [ 0, 1, 2 ], DOF: [ 89, 97, 69 ], NYPD: [ 767, 524, 355 ] }
  */
-export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData = [] ) {
+export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData = [] ):ColumnNamesAndData {
     let propNames = metaData.map( metaObject => metaObject[metaKey] );
     let result = {};
     propNames.map( (l, i) => { Object.assign( result, { [l]: columnData[i] } ) })
     return result;
 }
+
 
 /**
  * @param dataColumns data, will be converted to Arquero table inside this function
@@ -78,24 +80,22 @@ export function headedColumnsFrom( metaKey = 'name', metaData = [], columnData =
  *          todo: actually parse dates, times and hours and use those instead
  * @returns {*[]}  Array of data objects keyed by x: and y: no longer in Arquero table format
  */
-export function mapDataToXYPoints( dataColumns = table( { "Year" : [], "value" : [] })) {
+export async function mapDataToXYPoints( dataColumns ):Promise<Point2D[]> {
     const arqueroTable =  table(dataColumns)
     // @ts-ignore
     const tableWithIndex = arqueroTable.assign({ rowNumber: arqueroTable.indices() })
     let options = {}
     let xy = []
 
-    const justNames = tableWithIndex.columnNames()
-
-        justNames.forEach( (e, i) => {
+    // rebuild from names
+    tableWithIndex.columnNames().forEach( (e, i) => {
             options = {}
             options = {rowNumber: 'x', [e]: 'y'}
             xy.push(tableWithIndex.select(options))
         })
     let result = []
-    xy.forEach(t => result.push(t.objects()))
-    // seems to always return one blank entry...
-    return result.slice(0,-1)
+    xy.forEach( (t,i) => { if (i < (xy.length-1)) result.push(t.objects()) } )
+    return result
 }
 
 /**

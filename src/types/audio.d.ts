@@ -2,20 +2,13 @@ import { NodeRepr_t } from "@elemaudio/core";
 
 export type SignalOrNumber = number | NodeRepr_t;
 
-export type SynthSR = {
+
+export type BasicSynthVoice = {
   freq: SignalOrNumber;
   gate: SignalOrNumber;
   id?: string;
   options?: { gain?: SignalOrNumber }
 }
-
-export type SynthCR = {
-  freq: number;
-  gate: number;
-  id?: string;
-  options?: { gain?: number }
-}
-
 export type SampleBuffer = Float32Array;
 
 export type FunctionExpression = { expression: function }

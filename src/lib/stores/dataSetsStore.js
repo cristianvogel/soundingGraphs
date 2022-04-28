@@ -2,7 +2,7 @@
 
 import { arrayStore } from "./arrayStore.js";
 import dataSetsIndex from "../../assets/dataSets/dataSetsIndex.js";
-import { headedColumnsFrom, transposeRowsToColumns} from "$lib/common/dataUtils.ts";
+import { headedColumnsFrom, mapDataToXYPoints, transposeRowsToColumns } from "$lib/common/dataUtils.ts";
 import { from } from "arquero";
 
 const dataSetsStore = (initial) => {
@@ -22,10 +22,7 @@ const dataSetsStore = (initial) => {
         const fields = structuredData.fields;
         const columnData = transposeRowsToColumns(structuredData.rows);
         const columnsWithHeaders = headedColumnsFrom( 'name', fields, columnData)
-        // const normalized = structuredData.normalized;
-        const asArqueroTable = from(columnsWithHeaders)
-        // debug
-        // asArqueroTable.print()
+        const pointSeries = await mapDataToXYPoints(columnsWithHeaders)
 
         store.push({
             position,
@@ -35,9 +32,7 @@ const dataSetsStore = (initial) => {
             structuredData, // refactor: remove this and use the destructured refs below
             fields,
             columnsWithHeaders,
-            asArqueroTable
-            // normalized,
-
+            pointSeries
         });
     }
 

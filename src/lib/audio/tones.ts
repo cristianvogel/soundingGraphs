@@ -2,7 +2,7 @@
 
 import { el } from "@elemaudio/core";
 import { echo } from "./effects";
-import type { SignalOrNumber, SynthCR } from "../../types/audio";
+import type { SignalOrNumber, BasicSynthVoice } from "../../types/audio";
 import { clamp } from "../common/dataUtils";
 import { FuncGen } from "./control";
 import { Waves } from "../common/globals";
@@ -16,7 +16,7 @@ export function GraphScrubSynth(
     freq = 0,
     gate = 1,
     id = "scrubSynth"
-  }: SynthCR): SignalOrNumber {
+  }: BasicSynthVoice): SignalOrNumber {
       const deltaTest = (freq === deltaMem[1])
       const onOff = el.const( {value: deltaTest ? 0 : gate, key: `${id}-gate`} )
       ping  = el.mul(

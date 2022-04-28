@@ -6,6 +6,7 @@
 		audioStore,
 		speechSynthesis
 	} from "../lib/stores/audioStores";
+
 	import { lazyLoad } from '@benten28/svelte-utilities'
 	import {onMount, setContext} from "svelte";
 	import {get} from "svelte/store";
@@ -53,8 +54,7 @@
 			</button>
 		</div>
 	</div>
-
-	{/if}
+{/if}
 
 <style>
 
